@@ -52,7 +52,11 @@ If you discover a bug, let us know.  The project is hosted on Google Code at: ht
 
 -=[SVN]=-
 
-The latest source is available from subversion at the Google Code website: http://code.google.com/p/minnow-language/ under the [Source] tab.
+The latest stable source is available from subversion at the Google Code website: http://code.google.com/p/minnow-language/ under the [Source] tab.
+
+-=[GIT]=-
+
+The latest experimental source is available from git at GitHub: http://github.com/jonathanturner/minnow/tree/master and its associated branches.
 
 -=[THANKS]=-
 
