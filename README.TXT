@@ -1,6 +1,6 @@
 -=[GREETS]=-
 
-Welcome to the wonderful world of Minnow, a programming language designed to be easy to use and robust enough for today's multiprocessor hardware.
+Welcome to the wonderful world of Minnow -uh um-, at least, that's the plan. It's a programming language designed to be easy to use and robust enough for today's multiprocessor hardware, but we're not quite there yet.
 
 -=[GETTING THE LATEST]=-
 
@@ -56,4 +56,4 @@ The latest source is available from subversion at the Google Code website: http:
 
 -=[THANKS]=-
 
-Big thanks to Jason Turner (http://www.emptycrate.com) for more coding discussions than anyone would think possible.  Special thanks to Joe Armstrong, Simon Peyton-Jones, Robin Milner, Bjarne Stroustrup -- I've long lost count of how many times they've inspired another push forward while trying to figure out how far up their shoulders are.
+Big thanks to Jason Turner (http://www.emptycrate.com) for more coding discussions than anyone would think possible.  Special thanks to Joe Armstrong, Simon Peyton-Jones, Robin Milner, Bjarne Stroustrup -- that thing about shoulders and giants, you know the drill.
