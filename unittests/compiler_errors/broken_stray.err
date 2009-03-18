@@ -1,1 +1,0 @@
-Error: Two statements together without a separator.  Use return or semicolon at line 2 col 11 in unittests/compiler_errors/broken_stray.mno

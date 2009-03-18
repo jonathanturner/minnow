@@ -1,5 +1,0 @@
-action main
-  s : string = "Fred"
-  print(s.size())
-  Sys.exit()
-end

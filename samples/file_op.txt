@@ -1,3 +1,0 @@
-This is a test text file.
-It has multiple lines.
-Multiple lines are awesome.

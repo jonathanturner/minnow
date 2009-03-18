@@ -1,4 +1,0 @@
-action main
-  o : object
-  throw(o)
-end

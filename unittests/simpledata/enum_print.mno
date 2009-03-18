@@ -1,8 +1,0 @@
-enum TestMe(FIRST, SECOND, THIRD)
-
-action main
-  t : TestMe = TestMe.SECOND
-
-  print(t)
-  Sys.exit()
-end

@@ -1,4 +1,0 @@
-action main
-  x : Array[int] = new Array[int]
-  x[3] = 5
-end

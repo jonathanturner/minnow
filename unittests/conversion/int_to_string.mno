@@ -1,5 +1,0 @@
-action main
-  i : int = 25
-  print(i.to_string())
-  Sys.exit()
-end

@@ -1,7 +1,0 @@
-action main
-  a : Array[int] = new Array[int]
-  print(a.empty())
-  a.push(1)
-  print(a.empty())
-  Sys.exit()
-end

@@ -1,6 +1,0 @@
-use "samples/print_me.mno"
-
-action main
-  print_me()
-  Sys.exit()
-end
