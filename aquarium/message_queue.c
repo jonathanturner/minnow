@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "concurrency.h"
 #include "message.h"
 #include "message_queue.h"
 
@@ -14,7 +15,7 @@
  */
 
 inline BOOL atomic_msg_cas(struct Message **orig, struct Message *cmp, struct Message *new) {
-    return __sync_bool_compare_and_swap(orig, cmp, new);
+    return atomic_cas((void**)orig, (void*)cmp, (void*)new);
 }
 
 void enqueue_msg(struct Message_Queue *queue, struct Message *message) {
