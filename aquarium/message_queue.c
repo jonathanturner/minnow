@@ -9,17 +9,13 @@
 /*
  * Taken from Chapter 10 of Art of Multiprocessor Programming, Herlihy & Shavit
  *
- * todo: This does not address the ABA problem, fixme
+ * Because each msg queue has one, and only one, reader, the ABA
+ * problem is avoided.
  */
 
 inline BOOL atomic_msg_cas(struct Message **orig, struct Message *cmp, struct Message *new) {
     return __sync_bool_compare_and_swap(orig, cmp, new);
 }
-
-struct Tagged_Msg {
-    struct Message *msg;
-    unsigned int tag;
-};
 
 void enqueue_msg(struct Message_Queue *queue, struct Message *message) {
     while(TRUE) {
