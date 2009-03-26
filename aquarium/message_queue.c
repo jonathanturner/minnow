@@ -60,8 +60,3 @@ struct Message *dequeue_msg(struct Message_Queue *queue) {
     }
 }
 
-int main() {
-    printf("Hello\n");
-
-    return 0;
-}
