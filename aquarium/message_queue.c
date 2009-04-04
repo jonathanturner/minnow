@@ -10,7 +10,7 @@
 /*
  * Taken from Chapter 10 of Art of Multiprocessor Programming, Herlihy & Shavit
  *
- * Because each msg queue has one, and only one, reader, the ABA
+ * Because each msg queue has one reader the ABA
  * problem is avoided.
  */
 

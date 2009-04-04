@@ -5,7 +5,7 @@ SET(CMAKE_CXX_FLAGS_GDB " -Wall -ggdb -O3")
 SET(CMAKE_C_FLAGS_GDB " -Wall -ggdb -O3")
 
 INCLUDE_DIRECTORIES(aquarium)
-SET(AQUARIUM_SRCS aquarium/message_queue.c aquarium/main.c aquarium/concurrency.c aquarium/scheduler.c)
+SET(AQUARIUM_SRCS aquarium/message_queue.c aquarium/main.c aquarium/concurrency.c aquarium/scheduler.c aquarium/work_queue.c)
 
 SET (AQUARIUM_LIBS )
 #Platform ident hackery
