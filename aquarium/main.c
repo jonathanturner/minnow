@@ -64,6 +64,7 @@ struct Passer *create_passer() {
 }
 
 int msg_pass(struct Message *message) {
+    struct Scheduler *s = (struct Scheduler *)message->scheduler;
     struct Passer *this_ptr = (struct Passer *)(message->recipient);
     int token = message->args[0].Int32;
 
@@ -74,8 +75,21 @@ int msg_pass(struct Message *message) {
     else {
         token -= 1;
 
-        struct Message *m = create_message();
-        m = create_message();
+        struct Message *m;
+
+        if (s->cache_msg != NULL) {
+            m = s->cache_msg;
+            s->cache_msg = NULL;
+            m->scheduler = NULL;
+            m->next = NULL;
+        }
+
+        else {
+            //printf("creating a message for %i\n", token);
+
+            m = create_message();
+        }
+
         m->task = msg_pass;
         m->recipient = this_ptr->next;
         m->args[0].Int32 = token;
@@ -112,6 +126,7 @@ int main(int argc, char *argv[]) {
     for (i = 1; i < THREADRING_SIZE; ++i) {
         struct Passer *next = create_passer();
 
+
         m = create_message();
         m->task = msg_setIdAndNext;
         m->recipient = curr;
@@ -122,6 +137,7 @@ int main(int argc, char *argv[]) {
 
         curr = next;
     }
+
     m = create_message();
     m->task = msg_setIdAndNext;
     m->recipient = curr;

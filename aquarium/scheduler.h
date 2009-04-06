@@ -20,6 +20,8 @@ struct Scheduler {
 
     struct Work_Queue *work_queues[2];
     int which_active;
+
+    struct Message *cache_msg;
 };
 
 struct Scheduler *create_scheduler();

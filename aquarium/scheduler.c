@@ -18,6 +18,7 @@ struct Scheduler *create_scheduler() {
 
     retval->which_active = 0;
     retval->is_running = TRUE;
+    retval->cache_msg = NULL;
 
     return retval;
 }
@@ -80,7 +81,13 @@ void scheduler_loop(void *scheduler) {
                 if (message->task(message) == TASK_DONE) {
                     struct Message *m = dequeue_msg(a->mail);
                     if (a->mail->delay_msg_delete != NULL) {
-                        free(a->mail->delay_msg_delete);
+
+                        if (s->cache_msg != NULL) {
+                            free(a->mail->delay_msg_delete);
+                        }
+                        else {
+                            s->cache_msg = a->mail->delay_msg_delete;
+                        }
                     }
                     a->mail->delay_msg_delete = m;
                     message = a->mail->head->next;
