@@ -22,5 +22,6 @@ struct Actor {
 
 //public API
 struct Actor *create_actor();
+void initialize_actor(struct Actor *actor);
 
 #endif /* ACTOR_H_ */

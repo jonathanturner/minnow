@@ -28,5 +28,6 @@ void push_bottom_actor_to_alt(void *scheduler, void *actor);
 
 //public API
 void push_bottom_actor(void *scheduler, void *actor);
+void msg_actor(void *scheduler, void *actor, void *msg);
 
 #endif /* SCHEDULER_H_ */

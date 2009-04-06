@@ -35,10 +35,6 @@ void push_bottom_actor(void *scheduler, void *actor) {
     wq->actor_deq[local_bottom] = a;
     ++local_bottom;
     wq->bot = local_bottom;
-
-    printf("push_bottom\n");
-    printf("a: %p\n", a);
-    printf("wq->actor_deq[0] = %p\n", wq->actor_deq[0]);
 }
 
 void push_bottom_actor_to_alt(void *scheduler, void *actor) {
@@ -78,11 +74,12 @@ void scheduler_loop(void *scheduler) {
 
         if (a != NULL) {
             struct Message *message = a->mail->head->next;
-            message->scheduler = s;
             while ((a->timeslice_remaining > 0) && (message != NULL)) {
+                message->scheduler = s;
+
                 if (message->task(message) == TASK_DONE) {
                     struct Message *m = dequeue_msg(a->mail);
-                    free(m);
+                    //free(m);
                     message = a->mail->head->next;
                 }
                 else {
@@ -91,6 +88,9 @@ void scheduler_loop(void *scheduler) {
             }
             if (message != NULL) {
                 push_bottom_actor_to_alt(s, a);
+            }
+            else {
+                atomic_cas_int(&(a->actor_state), ACTOR_STATE_MSG, ACTOR_STATE_IDLE);
             }
         }
     }
