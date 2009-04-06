@@ -3,14 +3,32 @@
 
 // Temporary little file for testing purposes
 
+#include <stdlib.h>
+
 #include "actor.h"
 #include "concurrency.h"
 #include "scheduler.h"
 
+int base_count;
+
 int test_task(void *v) {
     struct Message *message = (struct Message *)v;
 
-    printf(".");
+    int i;
+
+    /*
+    for (i = 0; i < 10000; ++i) {
+        ++base_count;
+    }
+    */
+
+    base_count += 200;
+
+    if (base_count >= 1000000000) {
+        exit(0);
+    }
+
+    printf("==== %i =====\n", base_count);
 
     return TASK_INCOMPLETE;
 }
@@ -25,9 +43,8 @@ int main() {
     m->task = test_task;
     m->recipient = a;
 
-    enqueue_msg(a->mail, m);
-    push_bottom_actor(s, a);
-
+    msg_actor(s, a, m);
+    base_count = 0;
     scheduler_loop(s);
 
     return 0;

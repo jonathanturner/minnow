@@ -15,6 +15,7 @@ struct Actor *create_actor() {
         exit(1);
     }
     retval->mail = create_message_queue();
+    retval->actor_state = ACTOR_STATE_IDLE;
 
     return retval;
 }
