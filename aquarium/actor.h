@@ -11,6 +11,11 @@
 
 struct Actor {
     struct Message_Queue *mail;
+    void *scheduler;
+    int timeslice_remaining;
 };
+
+//public API
+struct Actor *create_actor();
 
 #endif /* ACTOR_H_ */

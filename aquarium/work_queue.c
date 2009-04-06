@@ -18,8 +18,8 @@ struct Actor *pop_top_actor(struct Work_Queue *work_queue) {
     struct Actor *retval = work_queue->actor_deq[old_age.Packed.top];
     union Age new_age = old_age;
     ++new_age.Packed.top;
-    atomic_cas_int(&(work_queue->age.Int), old_age.Int, new_age.Int);
-    if (old_age.Int == new_age.Int) {
+
+    if (atomic_cas_int(&(work_queue->age.Int), old_age.Int, new_age.Int)) {
         return retval;
     }
     else {
@@ -44,9 +44,11 @@ struct Actor *pop_bottom_actor(struct Work_Queue *work_queue) {
     union Age new_age;
     new_age.Packed.top = 0;
     new_age.Packed.tag = old_age.Packed.tag + 1;
+    printf("local_bottom: %i\nold_age.Packed.tag = %i\n", local_bottom, old_age.Packed.tag);
     if (local_bottom == old_age.Packed.top) {
-        atomic_cas_int(&(work_queue->age.Int), old_age.Int, new_age.Int);
-        if (old_age.Int == new_age.Int) {
+        printf("wq age: %i\n", work_queue->age.Int);
+        printf("old_age.Int: %i\n", old_age.Int);
+        if (atomic_cas_int(&(work_queue->age.Int), old_age.Int, new_age.Int)) {
             return retval;
         }
     }

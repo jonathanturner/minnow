@@ -7,7 +7,7 @@
 
 #include "common.h"
 
-inline BOOL atomic_cas(void **orig, void *cmp, void *new);
+inline BOOL atomic_cas(volatile void **orig, volatile void *cmp, volatile void *new);
 inline BOOL atomic_cas_int(int *orig, int cmp, int new);
 
 void *thread_create(void*(*func)(void*), void* arg);

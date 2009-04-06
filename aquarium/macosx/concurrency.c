@@ -15,7 +15,7 @@ struct Thread {
     pthread_t thread_id;
 };
 
-inline BOOL atomic_cas(void **orig, void *cmp, void *new) {
+inline BOOL atomic_cas(volatile void **orig, volatile void *cmp, volatile void *new) {
     return __sync_bool_compare_and_swap(orig, cmp, new);
 }
 
