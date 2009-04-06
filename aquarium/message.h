@@ -9,6 +9,7 @@
 
 struct Message {
     Type_Union args[8];
+    int (*task)(struct Message *msg);
     void *recipient;
     struct Message *next;
 };

@@ -5,7 +5,7 @@ SET(CMAKE_CXX_FLAGS_GDB " -Wall -ggdb -O3")
 SET(CMAKE_C_FLAGS_GDB " -Wall -ggdb -O3")
 
 INCLUDE_DIRECTORIES(aquarium)
-SET(AQUARIUM_SRCS aquarium/message_queue.c aquarium/main.c aquarium/concurrency.c aquarium/scheduler.c aquarium/work_queue.c)
+SET(AQUARIUM_SRCS aquarium/message_queue.c aquarium/main.c aquarium/scheduler.c aquarium/work_queue.c)
 
 SET (AQUARIUM_LIBS )
 #Platform ident hackery
@@ -19,7 +19,7 @@ ENDIF (WIN32)
 IF (UNIX) 
   IF (APPLE)
     IF (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    #SET (AQUARIUM_SRCS ${AQUARIUM_SRCS} aquarium/Mac/Threading.cpp)
+        SET (AQUARIUM_SRCS ${AQUARIUM_SRCS} aquarium/macosx/concurrency.c)
     ENDIF (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   ENDIF (APPLE)
 

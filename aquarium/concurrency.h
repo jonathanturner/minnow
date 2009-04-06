@@ -10,4 +10,11 @@
 inline BOOL atomic_cas(void **orig, void *cmp, void *new);
 inline BOOL atomic_cas_int(int *orig, int cmp, int new);
 
+void *thread_create(void*(*func)(void*), void* arg);
+void thread_join(void *thread);
+void thread_exit();
+int num_hw_threads();
+void sleep_in_ms(unsigned int amount);
+
+
 #endif /* CONCURRENCY_H_ */

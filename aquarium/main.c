@@ -4,9 +4,10 @@
 // Temporary little file for testing purposes
 
 #include "actor.h"
+#include "concurrency.h"
 
 int main() {
-    printf("Hello\n");
+    printf("Hello: %i\n", num_hw_threads());
 
     return 0;
 }
