@@ -79,7 +79,10 @@ void scheduler_loop(void *scheduler) {
 
                 if (message->task(message) == TASK_DONE) {
                     struct Message *m = dequeue_msg(a->mail);
-                    //free(m);
+                    if (a->mail->delay_msg_delete != NULL) {
+                        free(a->mail->delay_msg_delete);
+                    }
+                    a->mail->delay_msg_delete = m;
                     message = a->mail->head->next;
                 }
                 else {

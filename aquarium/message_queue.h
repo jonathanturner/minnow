@@ -9,6 +9,8 @@
 struct Message_Queue {
     volatile struct Message *head;
     volatile struct Message *tail;
+
+    struct Message *delay_msg_delete;
 };
 
 void enqueue_msg(struct Message_Queue *queue, struct Message *message);

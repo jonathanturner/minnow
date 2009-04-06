@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
 SET(CMAKE_BUILD_TYPE gdb)
-SET(CMAKE_CXX_FLAGS_GDB " -Wall -ggdb -O3")
-SET(CMAKE_C_FLAGS_GDB " -Wall -ggdb -O3")
+SET(CMAKE_CXX_FLAGS_GDB " -Wall -ggdb")
+SET(CMAKE_C_FLAGS_GDB " -Wall -ggdb")
 
 INCLUDE_DIRECTORIES(aquarium)
 SET(AQUARIUM_SRCS aquarium/actor.c aquarium/message.c aquarium/message_queue.c aquarium/main.c 

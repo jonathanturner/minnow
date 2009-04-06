@@ -33,6 +33,7 @@ void enqueue_msg(struct Message_Queue *queue, struct Message *message) {
                 }
             }
             else {
+                printf("CASing: %p from %p to %p\n", queue->tail, last, next);
                 atomic_msg_cas(&(queue->tail), last, next);
             }
         }
@@ -76,6 +77,8 @@ struct Message_Queue *create_message_queue() {
     struct Message *guard = create_message();
     retval->head = guard;
     retval->tail = guard;
+
+    retval->delay_msg_delete = NULL;
 
     return retval;
 }

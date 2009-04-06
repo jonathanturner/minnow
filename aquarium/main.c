@@ -74,11 +74,15 @@ int msg_pass(struct Message *message) {
     else {
         token -= 1;
 
-        message->task = msg_pass;
-        message->recipient = this_ptr->next;
-        message->args[0].Int32 = token;
+        struct Message *m = create_message();
+        m = create_message();
+        m->task = msg_pass;
+        m->recipient = this_ptr->next;
+        m->args[0].Int32 = token;
 
-        msg_actor(message->scheduler, this_ptr->next, message);
+        //printf("Actor %p is messaging %i to %p\n", this_ptr, token, this_ptr->next);
+
+        msg_actor(message->scheduler, this_ptr->next, m);
     }
 
     return TASK_DONE;
