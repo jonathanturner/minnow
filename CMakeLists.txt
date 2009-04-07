@@ -14,7 +14,7 @@ IF (WIN32)
   IF (MINGW)
   ENDIF (MINGW)
 
-  #SET (AQUARIUM_SRCS ${AQUARIUM_SRCS} aquarium/Windows/Threading.cpp)
+  SET (AQUARIUM_SRCS ${AQUARIUM_SRCS} aquarium/windows/concurrency.c)
 ENDIF (WIN32)
 
 IF (UNIX) 
