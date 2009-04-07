@@ -25,6 +25,7 @@ IF (UNIX)
 
         ADD_CUSTOM_COMMAND(OUTPUT UContext.o
 		        COMMAND gcc -c libcoroutine/PortableUContext_asm.S -o UContext.o)
+				SET (COROUTINE_SRCS ${COROUTINE_SRCS} UContext.o)
     ENDIF (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   ENDIF (APPLE)
 
@@ -44,10 +45,11 @@ IF (UNIX)
 
     ADD_CUSTOM_COMMAND(OUTPUT UContext.o
         COMMAND gcc -c libcoroutine/PortableUContext_asm.S -o UContext.o)
+	  SET (COROUTINE_SRCS ${COROUTINE_SRCS} UContext.o)
   ENDIF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 ENDIF (UNIX)
 
-ADD_LIBRARY (coroutine SHARED ${COROUTINE_SRCS} UContext.o )
+ADD_LIBRARY (coroutine SHARED ${COROUTINE_SRCS} )
 
 ADD_EXECUTABLE (aquarium_bin ${AQUARIUM_SRCS} )
 TARGET_LINK_LIBRARIES (aquarium_bin ${AQUARIUM_LIBS} coroutine )
