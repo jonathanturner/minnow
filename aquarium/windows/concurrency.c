@@ -20,9 +20,9 @@ struct Function_Package {
 };
 
 DWORD __stdcall run_function_package(void *v) {
-    FunctionPackage *fp = (FunctionPackage*)v;
+    struct Function_Package *fp = (struct Function_Package*)v;
     fp->func(fp->arg);
-    delete(fp);
+    free(fp);
     return 0;
 }
 
