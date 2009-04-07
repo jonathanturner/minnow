@@ -19,7 +19,16 @@ inline BOOL atomic_msg_cas(struct Message **orig, struct Message *cmp, struct Me
     return atomic_cas((void**)orig, (void*)cmp, (void*)new);
 }
 
-void enqueue_msg(struct Message_Queue *queue, struct Message *message) {
+/**
+ * Messages the actor, and returns whether or not the message was the first msg to the actor
+ */
+BOOL enqueue_msg(struct Message_Queue *queue, struct Message *message) {
+    BOOL retval;
+
+    if (queue->head->next == NULL)
+        retval = TRUE;
+    else
+        retval = FALSE;
 
     while(TRUE) {
         volatile struct Message *last = queue->tail;
@@ -29,14 +38,14 @@ void enqueue_msg(struct Message_Queue *queue, struct Message *message) {
             if (next == NULL) {
                 if (atomic_msg_cas(&(last->next), next, message)) {
                     atomic_msg_cas(&(queue->tail), last, message);
-                    return;
+                    return retval;
                 }
             }
             else {
-                printf("CASing: %p from %p to %p\n", queue->tail, last, next);
                 atomic_msg_cas(&(queue->tail), last, next);
             }
         }
+        retval = FALSE;
     }
 }
 
@@ -50,7 +59,6 @@ struct Message *dequeue_msg(struct Message_Queue *queue) {
         if (first == queue->head) {
             if (first == last) {
                 if (next == NULL) {
-                    //throw exception
                     return NULL;
                 }
                 atomic_msg_cas(&(queue->tail), last, next);

@@ -13,7 +13,7 @@ struct Message_Queue {
     struct Message *delay_msg_delete;
 };
 
-void enqueue_msg(struct Message_Queue *queue, struct Message *message);
+BOOL enqueue_msg(struct Message_Queue *queue, struct Message *message);
 struct Message *dequeue_msg(struct Message_Queue *queue);
 
 struct Message_Queue *create_message_queue();

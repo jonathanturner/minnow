@@ -99,9 +99,6 @@ void scheduler_loop(void *scheduler) {
             if (message != NULL) {
                 push_bottom_actor_to_alt(s, a);
             }
-            else {
-                atomic_cas_int(&(a->actor_state), ACTOR_STATE_MSG, ACTOR_STATE_IDLE);
-            }
         }
     }
 }
@@ -111,51 +108,7 @@ void msg_actor(void *scheduler, void *actor, void *msg) {
     struct Actor *a = (struct Actor *)actor;
     struct Message *m = (struct Message *)msg;
 
-    /*
-     * Algorithm for stealing an idle actor once you've msg'd it (from my notes, not yet proven):
-     *
-
-        Switch statement on [status]
-
-        * [Idle] CAS from Idle->Scheduled
-              o If successful, you steal the actor
-                    + Then, CAS from Scheduled->Msg
-                          # If successful, do nothing
-                          # If fail, do nothing (since it'll be at Msg already)
-              o If failed, CAS from Scheduled->Msg
-                    + If successful, do nothing
-                    + If failed, loop
-        * [Scheduled] CAS from Scheduled->Msg
-              o If successful, do nothing
-              o If failed, loop
-        * [Msg] Do nothing
-
-    */
-
-    enqueue_msg(a->mail, m);
-
-    while (1) {
-        if (a->actor_state == ACTOR_STATE_IDLE) {
-            if (atomic_cas_int(&(a->actor_state), ACTOR_STATE_IDLE, ACTOR_STATE_SCHEDULED)) {
-                //Successfully steal the actor
-                atomic_cas_int(&(a->actor_state), ACTOR_STATE_SCHEDULED, ACTOR_STATE_MSG);
-                a->scheduler = s;
-                push_bottom_actor(s, a);
-            }
-            else {
-                continue;
-            }
-        }
-        else if (a->actor_state == ACTOR_STATE_SCHEDULED) {
-            if (atomic_cas_int(&(a->actor_state), ACTOR_STATE_IDLE, ACTOR_STATE_SCHEDULED) == FALSE) {
-                continue;
-            }
-            else {
-                break;
-            }
-        }
-        else {
-            break;
-        }
+    if (enqueue_msg(a->mail, m)) {
+        push_bottom_actor(s, a);
     }
 }
