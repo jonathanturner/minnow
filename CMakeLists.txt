@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
 SET(CMAKE_BUILD_TYPE gdb)
-SET(CMAKE_CXX_FLAGS_GDB " -Wall -ggdb")
-SET(CMAKE_C_FLAGS_GDB " -Wall -ggdb")
+SET(CMAKE_CXX_FLAGS_GDB " -Wall -ggdb -O3")
+SET(CMAKE_C_FLAGS_GDB " -Wall -ggdb -O3")
 
 INCLUDE_DIRECTORIES(aquarium)
 SET(AQUARIUM_SRCS aquarium/actor.c aquarium/message.c aquarium/message_queue.c aquarium/main.c 
@@ -35,10 +35,10 @@ IF (UNIX)
   ENDIF (CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 
   IF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    #SET (AQUARIUM_SRCS ${AQUARIUM_SRCS} aquarium/Linux/Threading.cpp)
+    SET (AQUARIUM_SRCS ${AQUARIUM_SRCS} aquarium/linux/concurrency.c)
     SET (AQUARIUM_LIBS ${AQUARIUM_LIBS} pthread)
   ENDIF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 ENDIF (UNIX)
 
 ADD_EXECUTABLE (aquarium_bin ${AQUARIUM_SRCS} )
-#TARGET_LINK_LIBRARIES (aquarium ${AQUARIUM_LIBS} )
+TARGET_LINK_LIBRARIES (aquarium_bin ${AQUARIUM_LIBS} )
