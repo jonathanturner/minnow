@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 SET(CMAKE_BUILD_TYPE gdb)
 SET(CMAKE_C_FLAGS_GDB " -Wall -ggdb -O3")
 
-INCLUDE_DIRECTORIES(aquarium)
+INCLUDE_DIRECTORIES(aquarium libcoroutine)
 SET(AQUARIUM_SRCS aquarium/actor.c aquarium/message.c aquarium/message_queue.c aquarium/main.c 
     aquarium/scheduler.c aquarium/work_queue.c)
 
@@ -50,4 +50,4 @@ ENDIF (UNIX)
 ADD_LIBRARY (coroutine SHARED ${COROUTINE_SRCS} UContext.o )
 
 ADD_EXECUTABLE (aquarium_bin ${AQUARIUM_SRCS} )
-TARGET_LINK_LIBRARIES (aquarium_bin ${AQUARIUM_LIBS} )
+TARGET_LINK_LIBRARIES (aquarium_bin ${AQUARIUM_LIBS} coroutine )
