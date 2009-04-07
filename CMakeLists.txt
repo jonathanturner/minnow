@@ -24,8 +24,8 @@ IF (UNIX)
         SET (AQUARIUM_SRCS ${AQUARIUM_SRCS} aquarium/macosx/concurrency.c)
 
         ADD_CUSTOM_COMMAND(OUTPUT UContext.o
-		        COMMAND gcc -c libcoroutine/PortableUContext_asm.S -o UContext.o)
-				SET (COROUTINE_SRCS ${COROUTINE_SRCS} UContext.o)
+        COMMAND gcc -c libcoroutine/PortableUContext_asm.S -o UContext.o)
+        SET (COROUTINE_SRCS ${COROUTINE_SRCS} UContext.o)
     ENDIF (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   ENDIF (APPLE)
 
@@ -44,8 +44,8 @@ IF (UNIX)
     SET (AQUARIUM_LIBS ${AQUARIUM_LIBS} pthread)
 
     ADD_CUSTOM_COMMAND(OUTPUT UContext.o
-        COMMAND gcc -c libcoroutine/PortableUContext_asm.S -o UContext.o)
-	  SET (COROUTINE_SRCS ${COROUTINE_SRCS} UContext.o)
+    COMMAND gcc -c libcoroutine/PortableUContext_asm.S -o UContext.o)
+    SET (COROUTINE_SRCS ${COROUTINE_SRCS} UContext.o)
   ENDIF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 ENDIF (UNIX)
 
