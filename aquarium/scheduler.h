@@ -25,7 +25,7 @@ struct Scheduler {
 };
 
 struct Scheduler *create_scheduler();
-void scheduler_loop(void *scheduler);
+void *scheduler_loop(void *scheduler);
 void push_bottom_actor_to_alt(void *scheduler, void *actor);
 
 //public API

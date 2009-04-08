@@ -9,43 +9,100 @@
 #include "concurrency.h"
 #include "scheduler.h"
 
-/*
-int base_count;
+struct Counter {
+    struct Actor actor;
 
-int test_task(void *v) {
+    int id;
+    int base_count;
+};
+
+volatile int total_done;
+
+void safe_inc() {
+    while (!atomic_cas_int(&total_done, total_done, total_done+1));
+}
+
+int test_task(struct Message *v) {
     struct Message *message = (struct Message *)v;
+    struct Counter *c = (struct Counter *)message->recipient;
 
-    int i;
+    c->base_count += 1;
+    //sleep_in_ms(15);
+    if (c->base_count >= 10000000) {
+        safe_inc();
+        printf("Done\n");
 
-    base_count += 200;
-
-    if (base_count >= 1000000000) {
-        exit(0);
+        if (total_done == 5) {
+            exit(0);
+        }
+        return TASK_DONE;
     }
 
-    printf("==== %i =====\n", base_count);
+    if ((c->base_count % 1000000) == 0) {
+        printf("==== %i in %p =====\n", c->base_count, c->actor.scheduler);
+    }
 
     return TASK_INCOMPLETE;
+}
+
+struct Counter *create_counter() {
+    struct Counter *retval = (struct Counter *)malloc(sizeof(struct Counter));
+    initialize_actor(&(retval->actor));
+    retval->base_count = 0;
+
+    return retval;
+}
+
+struct Scheduler *create_all_schedulers(int count) {
+    if (count < 1) {
+        printf("Number of schedulers must be at least one.\n");
+        exit(1);
+    }
+    struct Scheduler **s = (struct Scheduler **)malloc(sizeof(struct Scheduler *) * count);
+
+    int i;
+    for (i = 0; i < count; ++i) {
+        s[i] = create_scheduler();
+        printf("Created scheduler: %p\n", s[i]);
+    }
+
+    for (i = 0; i < count; ++i) {
+        s[i]->schedulers = s;
+        s[i]->num_schedulers = count;
+    }
+
+    return s[0];
 }
 
 int main() {
     printf("Hello: %i\n", num_hw_threads());
 
-    struct Scheduler *s = create_scheduler();
-    struct Actor *a = create_actor();
+    struct Scheduler *s = create_all_schedulers(num_hw_threads());
 
-    struct Message *m = create_message();
-    m->task = test_task;
-    m->recipient = a;
+    int i;
+    total_done = 0;
 
-    msg_actor(s, a, m);
-    base_count = 0;
+    for (i = 0; i < 5; ++i) {
+        struct Counter *c = create_counter();
+        c->id = i;
+
+        struct Message *m = create_message();
+        m->task = test_task;
+        m->recipient = c;
+
+        msg_actor(s, c, m);
+    }
+
+    for (i = 1; i < s->num_schedulers; ++i) {
+        create_thread(scheduler_loop, s->schedulers[i]);
+    }
+
     scheduler_loop(s);
 
     return 0;
 }
-*/
 
+/*
 #define THREADRING_SIZE 503
 
 struct Passer {
@@ -157,3 +214,5 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+*/
+

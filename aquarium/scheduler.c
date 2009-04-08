@@ -57,19 +57,57 @@ void push_bottom_actor_to_alt(void *scheduler, void *actor) {
     wq->bot = local_bottom;
 }
 
-void scheduler_loop(void *scheduler) {
+struct Actor *steal_actor(struct Scheduler *scheduler) {
+    struct Actor *retval = NULL;
+
+    //todo: change victim picking to pseudo random, or else we'll kill ourselves over the first guy in the list
+    int i;
+    for (i = 0; i < scheduler->num_schedulers; ++i) {
+        struct Scheduler *victim = scheduler->schedulers[i];
+
+        int j;
+        //When we try our victim, we try both of its work queues so, in essence, we are actually stealing from either "side".
+        for (j = 0; j < 2; ++j) {
+            if ((victim->work_queues[j]->bot - victim->work_queues[j]->age.Packed.top) >= 1) {
+                retval = pop_top_actor(victim->work_queues[j]);
+                if (retval != NULL) {
+                    return retval;
+                }
+            }
+        }
+    }
+
+    return retval;
+}
+
+void *scheduler_loop(void *scheduler) {
     struct Scheduler *s = (struct Scheduler*)scheduler;
     struct Actor *a;
 
     while (s->is_running) {
         a = pop_bottom_actor(s->work_queues[s->which_active]);
         if (a == NULL) {
-            if (s->which_active == 0)
-                s->which_active = 1;
-            else
-                s->which_active = 0;
+            if ((s->work_queues[0]->bot == s->work_queues[0]->age.Packed.top) &&
+                    (s->work_queues[1]->bot == s->work_queues[1]->age.Packed.top)) {
+                a = steal_actor(s);
+                if (a == NULL) {
+                    printf("--- Steal failed for %p ---\n", s);
+                    sleep_in_ms(15);
+                    continue;
+                }
+                else {
+                    a->scheduler = s;
+                    printf("+++ Steal successful for %p +++\n", s);
+                }
+            }
+            else {
+                if (s->which_active == 0)
+                    s->which_active = 1;
+                else
+                    s->which_active = 0;
 
-            continue;
+                continue;
+            }
         }
         a->timeslice_remaining = TIMESLICE_SIZE;
 
@@ -101,6 +139,8 @@ void scheduler_loop(void *scheduler) {
             }
         }
     }
+
+    return NULL;
 }
 
 void msg_actor(void *scheduler, void *actor, void *msg) {
@@ -109,6 +149,7 @@ void msg_actor(void *scheduler, void *actor, void *msg) {
     struct Message *m = (struct Message *)msg;
 
     if (enqueue_msg(a->mail, m)) {
+        a->scheduler = s;
         push_bottom_actor(s, a);
     }
 }

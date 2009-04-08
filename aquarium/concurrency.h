@@ -10,9 +10,9 @@
 inline BOOL atomic_cas(volatile void **orig, volatile void *cmp, volatile void *new);
 inline BOOL atomic_cas_int(int *orig, int cmp, int new);
 
-void *thread_create(void*(*func)(void*), void* arg);
-void thread_join(void *thread);
-void thread_exit();
+void *create_thread(void*(*func)(void*), void* arg);
+void join_thread(void *thread);
+void exit_thread();
 int num_hw_threads();
 void sleep_in_ms(unsigned int amount);
 

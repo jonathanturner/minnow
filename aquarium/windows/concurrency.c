@@ -36,7 +36,7 @@ inline BOOL atomic_cas_int(int *orig, int cmp, int new) {
     return __sync_bool_compare_and_swap(orig, cmp, new);
 }
 
-void *thread_create(void*(*func)(void*), void* arg) {
+void *create_thread(void*(*func)(void*), void* arg) {
     struct Thread *retval = (struct Thread*)malloc(sizeof(struct Thread));
     struct Function_Package *fp = (struct Function_Package *)malloc(sizeof(struct Function_Package));
     
@@ -54,13 +54,13 @@ void *thread_create(void*(*func)(void*), void* arg) {
     return retval;
 }
 
-void thread_join(void *thread) {
+void join_thread(void *thread) {
     struct Thread *t = (struct Thread*)thread;
 
     WaitForSingleObject(t->thread_handle, INFINITE);
 }
 
-void thread_exit() {
+void exit_thread() {
     //todo: needs implementation
 }
 
