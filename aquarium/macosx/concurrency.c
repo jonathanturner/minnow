@@ -15,12 +15,12 @@ struct Thread {
     pthread_t thread_id;
 };
 
-inline BOOL atomic_cas(volatile void **orig, volatile void *cmp, volatile void *new) {
+inline CBOOL atomic_cas(volatile void **orig, volatile void *cmp, volatile void *new) {
     //printf("CAS\n");
     return __sync_bool_compare_and_swap(orig, cmp, new);
 }
 
-inline BOOL atomic_cas_int(int *orig, int cmp, int new) {
+inline CBOOL atomic_cas_int(int *orig, int cmp, int new) {
     //printf("CAS Int\n");
     return __sync_bool_compare_and_swap(orig, cmp, new);
 }

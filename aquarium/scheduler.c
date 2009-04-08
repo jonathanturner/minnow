@@ -18,7 +18,7 @@ struct Scheduler *create_scheduler() {
 
     retval->which_active = 0;
     retval->idle_count = 0;
-    retval->is_running = TRUE;
+    retval->is_running = CTRUE;
     retval->cache_msg = NULL;
     retval->internal_coro = Coro_new();
 
@@ -82,12 +82,12 @@ struct Actor *steal_actor(struct Scheduler *scheduler) {
     return retval;
 }
 
-BOOL check_for_all_schedulers_idle(struct Scheduler *scheduler) {
+CBOOL check_for_all_schedulers_idle(struct Scheduler *scheduler) {
     int i;
-    BOOL retval = TRUE;
+    CBOOL retval = CTRUE;
     for (i = 0; i < scheduler->num_schedulers; ++i) {
         if (scheduler->schedulers[i]->idle_count <= MAX_IDLE_ITERS) {
-            retval = FALSE;
+            retval = CFALSE;
         }
     }
     return retval;

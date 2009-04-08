@@ -15,22 +15,22 @@
  * problem is avoided.
  */
 
-inline BOOL atomic_msg_cas(struct Message **orig, struct Message *cmp, struct Message *new) {
+inline CBOOL atomic_msg_cas(struct Message **orig, struct Message *cmp, struct Message *new) {
     return atomic_cas((void**)orig, (void*)cmp, (void*)new);
 }
 
 /**
  * Messages the actor, and returns whether or not the message was the first msg to the actor
  */
-BOOL enqueue_msg(struct Message_Queue *queue, struct Message *message) {
-    BOOL retval;
+CBOOL enqueue_msg(struct Message_Queue *queue, struct Message *message) {
+    CBOOL retval;
 
     if (queue->head->next == NULL)
-        retval = TRUE;
+        retval = CTRUE;
     else
-        retval = FALSE;
+        retval = CFALSE;
 
-    while(TRUE) {
+    while(CTRUE) {
         volatile struct Message *last = queue->tail;
         struct Message *next = last->next;
 
@@ -45,13 +45,13 @@ BOOL enqueue_msg(struct Message_Queue *queue, struct Message *message) {
                 atomic_msg_cas(&(queue->tail), last, next);
             }
         }
-        retval = FALSE;
+        retval = CFALSE;
     }
 }
 
 struct Message *dequeue_msg(struct Message_Queue *queue) {
 
-    while (TRUE) {
+    while (CTRUE) {
         volatile struct Message *first = queue->head;
         volatile struct Message *last = queue->tail;
         struct Message *next = first->next;

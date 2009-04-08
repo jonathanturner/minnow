@@ -5,11 +5,11 @@
 #define COMMON_H_
 
 /** A bool for compatibility with older C */
-#define BOOL char
+#define CBOOL char
 /** A true for compatibility with older C */
-#define TRUE 1
+#define CTRUE 1
 /** A false for compatibility with older C */
-#define FALSE 0
+#define CFALSE 0
 
 /**
  * The union that allows us to collapse all the datatypes into one value type
@@ -25,7 +25,7 @@ typedef union {
     unsigned long long UInt64;
     float Float;
     double Double;
-    BOOL Bool;
+    CBOOL Bool;
     void(*Function)(void *);
     void *VoidPtr;
 }  Type_Union;

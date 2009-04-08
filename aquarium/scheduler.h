@@ -14,7 +14,7 @@
 #define MAX_IDLE_ITERS 10
 
 struct Scheduler {
-    BOOL is_running;
+    CBOOL is_running;
 
     struct Scheduler **schedulers;
     int num_schedulers;
