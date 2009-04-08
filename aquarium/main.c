@@ -13,7 +13,7 @@ struct Counter {
     struct Actor actor;
 
     int id;
-    int base_count;
+    //int base_count;
 };
 
 volatile int total_done;
@@ -22,34 +22,35 @@ void safe_inc() {
     while (!atomic_cas_int(&total_done, total_done, total_done+1));
 }
 
-int test_task(struct Message *v) {
+void test_task(struct Message *v) {
     struct Message *message = (struct Message *)v;
     struct Counter *c = (struct Counter *)message->recipient;
+    int base_count = 0;
+    while (1) {
+        base_count += 10;
+        if (base_count >= 10000) {
+            safe_inc();
+            printf("Done\n");
 
-    c->base_count += 1;
-    //sleep_in_ms(15);
-    if (c->base_count >= 1000) {
-        safe_inc();
-        printf("Done\n");
-
-        //if (total_done == 3) {
-        //    exit(0);
-        //}
-        return TASK_DONE;
+            //if (total_done == 3) {
+            //    exit(0);
+            //}
+            c->actor.actor_state = ACTOR_STATE_IDLE;
+            Coro_switchTo_(c->actor.internal_coro, ((struct Scheduler *)v->scheduler)->internal_coro);
+        }
+        sleep_in_ms(5);
+        if ((base_count % 1000) == 0) {
+            printf("==== %i in actor %i in %p =====\n", base_count, c->id, c->actor.scheduler);
+            Coro_switchTo_(c->actor.internal_coro, ((struct Scheduler *)v->scheduler)->internal_coro);
+        }
     }
-    sleep_in_ms(5);
 
-    if ((c->base_count % 100) == 0) {
-        printf("==== %i in %p =====\n", c->base_count, c->actor.scheduler);
-    }
-
-    return TASK_INCOMPLETE;
+    Coro_switchTo_(c->actor.internal_coro, ((struct Scheduler *)v->scheduler)->internal_coro);
 }
 
 struct Counter *create_counter() {
     struct Counter *retval = (struct Counter *)malloc(sizeof(struct Counter));
     initialize_actor(&(retval->actor));
-    retval->base_count = 0;
 
     return retval;
 }
@@ -83,7 +84,7 @@ int main() {
     int i;
     total_done = 0;
 
-    for (i = 0; i < 2; ++i) {
+    for (i = 0; i < 10; ++i) {
         struct Counter *c = create_counter();
         c->id = i;
 

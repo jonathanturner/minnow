@@ -12,7 +12,7 @@
 
 struct Message {
     Type_Union args[8];
-    int (*task)(struct Message *msg);
+    void (*task)(struct Message *msg);
     void *recipient;
     void *scheduler;
     struct Message *next;

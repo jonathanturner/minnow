@@ -5,14 +5,21 @@
 #define ACTOR_H_
 
 #include <stdio.h>
+#include "Coro.h"
 
 #include "common.h"
 #include "message_queue.h"
+
+#define ACTOR_STATE_IDLE    1
+#define ACTOR_STATE_BUSY    2
 
 struct Actor {
     struct Message_Queue *mail;
     void *scheduler;
     int timeslice_remaining;
+    volatile int actor_state;
+
+    Coro *internal_coro;
 };
 
 //public API

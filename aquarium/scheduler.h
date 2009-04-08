@@ -23,6 +23,7 @@ struct Scheduler {
     int which_active;
 
     volatile int idle_count;
+    Coro *internal_coro;
 
     struct Message *cache_msg;
 };
