@@ -32,7 +32,7 @@ int test_task(struct Message *v) {
         safe_inc();
         printf("Done\n");
 
-        if (total_done == 5) {
+        if (total_done == 10) {
             exit(0);
         }
         return TASK_DONE;
@@ -82,7 +82,7 @@ int main() {
     int i;
     total_done = 0;
 
-    for (i = 0; i < 5; ++i) {
+    for (i = 0; i < 10; ++i) {
         struct Counter *c = create_counter();
         c->id = i;
 

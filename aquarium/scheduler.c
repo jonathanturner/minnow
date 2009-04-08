@@ -91,7 +91,7 @@ void *scheduler_loop(void *scheduler) {
                     (s->work_queues[1]->bot == s->work_queues[1]->age.Packed.top)) {
                 a = steal_actor(s);
                 if (a == NULL) {
-                    printf("--- Steal failed for %p ---\n", s);
+                    //printf("--- Steal failed for %p ---\n", s);
                     sleep_in_ms(15);
                     continue;
                 }
