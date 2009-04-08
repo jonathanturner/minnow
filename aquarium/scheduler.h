@@ -11,6 +11,7 @@
 
 #define DEQUEUE_SIZE 100000
 #define TIMESLICE_SIZE 2000
+#define MAX_IDLE_ITERS 10
 
 struct Scheduler {
     BOOL is_running;
@@ -20,6 +21,8 @@ struct Scheduler {
 
     struct Work_Queue *work_queues[2];
     int which_active;
+
+    volatile int idle_count;
 
     struct Message *cache_msg;
 };

@@ -28,17 +28,18 @@ int test_task(struct Message *v) {
 
     c->base_count += 1;
     //sleep_in_ms(15);
-    if (c->base_count >= 10000000) {
+    if (c->base_count >= 1000) {
         safe_inc();
         printf("Done\n");
 
-        if (total_done == 10) {
-            exit(0);
-        }
+        //if (total_done == 3) {
+        //    exit(0);
+        //}
         return TASK_DONE;
     }
+    sleep_in_ms(5);
 
-    if ((c->base_count % 1000000) == 0) {
+    if ((c->base_count % 100) == 0) {
         printf("==== %i in %p =====\n", c->base_count, c->actor.scheduler);
     }
 
@@ -82,7 +83,7 @@ int main() {
     int i;
     total_done = 0;
 
-    for (i = 0; i < 10; ++i) {
+    for (i = 0; i < 2; ++i) {
         struct Counter *c = create_counter();
         c->id = i;
 

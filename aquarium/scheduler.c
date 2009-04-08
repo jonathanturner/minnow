@@ -17,6 +17,7 @@ struct Scheduler *create_scheduler() {
     }
 
     retval->which_active = 0;
+    retval->idle_count = 0;
     retval->is_running = TRUE;
     retval->cache_msg = NULL;
 
@@ -80,6 +81,17 @@ struct Actor *steal_actor(struct Scheduler *scheduler) {
     return retval;
 }
 
+BOOL check_for_all_schedulers_idle(struct Scheduler *scheduler) {
+    int i;
+    BOOL retval = TRUE;
+    for (i = 0; i < scheduler->num_schedulers; ++i) {
+        if (scheduler->schedulers[i]->idle_count <= MAX_IDLE_ITERS) {
+            retval = FALSE;
+        }
+    }
+    return retval;
+}
+
 void *scheduler_loop(void *scheduler) {
     struct Scheduler *s = (struct Scheduler*)scheduler;
     struct Actor *a;
@@ -93,10 +105,19 @@ void *scheduler_loop(void *scheduler) {
                 if (a == NULL) {
                     //printf("--- Steal failed for %p ---\n", s);
                     sleep_in_ms(15);
+                    ++s->idle_count;
+                    //arbitrary count limit
+                    if (s->idle_count > MAX_IDLE_ITERS) {
+                        if (check_for_all_schedulers_idle(s)) {
+                            printf("DEBUG:System idle, exiting.\n");
+                            exit(0);
+                        }
+                    }
                     continue;
                 }
                 else {
                     a->scheduler = s;
+                    s->idle_count = 0;
                     printf("+++ Steal successful for %p +++\n", s);
                 }
             }
@@ -108,6 +129,9 @@ void *scheduler_loop(void *scheduler) {
 
                 continue;
             }
+        }
+        else {
+            s->idle_count = 0;
         }
         a->timeslice_remaining = TIMESLICE_SIZE;
 
