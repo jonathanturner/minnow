@@ -94,10 +94,11 @@ CBOOL check_for_all_schedulers_idle(struct Scheduler *scheduler) {
 
 void *scheduler_loop(void *scheduler) {
     struct Scheduler *s = (struct Scheduler*)scheduler;
-    struct Actor *a;
+    struct Actor *a = NULL;
 
     while (s->is_running) {
         a = pop_bottom_actor(s->work_queues[s->which_active]);
+
         if (a == NULL) {
             if ((s->work_queues[0]->bot == s->work_queues[0]->age.Packed.top) &&
                     (s->work_queues[1]->bot == s->work_queues[1]->age.Packed.top)) {
@@ -130,39 +131,36 @@ void *scheduler_loop(void *scheduler) {
                 continue;
             }
         }
-        else {
-            s->idle_count = 0;
-        }
+
+        s->idle_count = 0;
         a->timeslice_remaining = TIMESLICE_SIZE;
 
-        if (a != NULL) {
-            struct Message *message = a->mail->head->next;
-            while ((a->timeslice_remaining > 0) && (message != NULL)) {
-                message->scheduler = s;
+        struct Message *message = a->mail->head->next;
+        while ((a->timeslice_remaining > 0) && (message != NULL)) {
+            message->scheduler = s;
 
-                message->task(message);
+            message->task(message);
 
-                if (a->actor_state == ACTOR_STATE_IDLE) {
-                    struct Message *m = dequeue_msg(a->mail);
-                    if (a->mail->delay_msg_delete != NULL) {
+            if (a->actor_state == ACTOR_STATE_IDLE) {
+                struct Message *m = dequeue_msg(a->mail);
+                if (a->mail->delay_msg_delete != NULL) {
 
-                        if (s->cache_msg != NULL) {
-                            free(a->mail->delay_msg_delete);
-                        }
-                        else {
-                            s->cache_msg = a->mail->delay_msg_delete;
-                        }
+                    if (s->cache_msg != NULL) {
+                        free(a->mail->delay_msg_delete);
                     }
-                    a->mail->delay_msg_delete = m;
-                    message = a->mail->head->next;
+                    else {
+                        s->cache_msg = a->mail->delay_msg_delete;
+                    }
                 }
-                else {
-                    break;
-                }
+                a->mail->delay_msg_delete = m;
+                message = a->mail->head->next;
             }
-            if (message != NULL) {
-                push_bottom_actor_to_alt(s, a);
+            else {
+                break;
             }
+        }
+        if (message != NULL) {
+            push_bottom_actor_to_alt(s, a);
         }
     }
 

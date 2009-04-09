@@ -9,6 +9,7 @@
 #include "concurrency.h"
 #include "scheduler.h"
 
+/*
 struct Counter {
     struct Actor actor;
 
@@ -101,8 +102,8 @@ int main() {
 
     return 0;
 }
+*/
 
-/*
 #define THREADRING_SIZE 503
 
 struct Passer {
@@ -214,5 +215,5 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-*/
+
 
