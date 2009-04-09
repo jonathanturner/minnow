@@ -20,7 +20,6 @@ struct Scheduler *create_scheduler() {
     retval->idle_count = 0;
     retval->is_running = CTRUE;
     retval->cache_msg = NULL;
-    retval->internal_coro = Coro_new();
 
     return retval;
 }
@@ -141,13 +140,7 @@ void *scheduler_loop(void *scheduler) {
             while ((a->timeslice_remaining > 0) && (message != NULL)) {
                 message->scheduler = s;
 
-                if (a->actor_state == ACTOR_STATE_IDLE) {
-                    a->actor_state = ACTOR_STATE_BUSY;
-                    Coro_startCoro_(s->internal_coro, a->internal_coro, message, message->task);
-                }
-                else {
-                    Coro_switchTo_(s->internal_coro, a->internal_coro);
-                }
+                message->task(message);
 
                 if (a->actor_state == ACTOR_STATE_IDLE) {
                     struct Message *m = dequeue_msg(a->mail);

@@ -36,16 +36,14 @@ void test_task(struct Message *v) {
             //    exit(0);
             //}
             c->actor.actor_state = ACTOR_STATE_IDLE;
-            Coro_switchTo_(c->actor.internal_coro, ((struct Scheduler *)v->scheduler)->internal_coro);
+            return;
         }
         sleep_in_ms(5);
         if ((base_count % 1000) == 0) {
             printf("==== %i in actor %i in %p =====\n", base_count, c->id, c->actor.scheduler);
-            Coro_switchTo_(c->actor.internal_coro, ((struct Scheduler *)v->scheduler)->internal_coro);
         }
     }
 
-    Coro_switchTo_(c->actor.internal_coro, ((struct Scheduler *)v->scheduler)->internal_coro);
 }
 
 struct Counter *create_counter() {

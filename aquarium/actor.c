@@ -15,7 +15,6 @@ struct Actor *create_actor() {
         exit(1);
     }
     retval->mail = create_message_queue();
-    retval->internal_coro = Coro_new();
     retval->actor_state = ACTOR_STATE_IDLE;
 
     return retval;
@@ -23,6 +22,5 @@ struct Actor *create_actor() {
 
 void initialize_actor(struct Actor *actor) {
     actor->mail = create_message_queue();
-    actor->internal_coro = Coro_new();
     actor->actor_state = ACTOR_STATE_IDLE;
 }

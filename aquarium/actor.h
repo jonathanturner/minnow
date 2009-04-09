@@ -5,7 +5,6 @@
 #define ACTOR_H_
 
 #include <stdio.h>
-#include "Coro.h"
 
 #include "common.h"
 #include "message_queue.h"
@@ -18,8 +17,6 @@ struct Actor {
     void *scheduler;
     int timeslice_remaining;
     volatile int actor_state;
-
-    Coro *internal_coro;
 };
 
 //public API
