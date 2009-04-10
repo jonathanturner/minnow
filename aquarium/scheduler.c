@@ -36,7 +36,8 @@ void push_bottom_actor(void *scheduler, void *actor) {
     int local_bottom = wq->bot;
     wq->actor_deq[local_bottom] = a;
     ++local_bottom;
-    wq->bot = local_bottom;
+    //wq->bot = local_bottom;
+    atomic_cas_int(&(wq->bot), wq->bot, local_bottom);
 }
 
 void push_bottom_actor_to_alt(void *scheduler, void *actor) {
@@ -55,7 +56,8 @@ void push_bottom_actor_to_alt(void *scheduler, void *actor) {
     int local_bottom = wq->bot;
     wq->actor_deq[local_bottom] = a;
     ++local_bottom;
-    wq->bot = local_bottom;
+    //wq->bot = local_bottom;
+    atomic_cas_int(&(wq->bot), wq->bot, local_bottom);
 }
 
 struct Actor *steal_actor(struct Scheduler *scheduler) {
@@ -104,7 +106,7 @@ void *scheduler_loop(void *scheduler) {
                     (s->work_queues[1]->bot == s->work_queues[1]->age.Packed.top)) {
                 a = steal_actor(s);
                 if (a == NULL) {
-                    //printf("--- Steal failed for %p ---\n", s);
+                    printf("--- Steal failed for %p ---\n", s);
                     sleep_in_ms(15);
                     ++s->idle_count;
                     //arbitrary count limit
@@ -131,8 +133,10 @@ void *scheduler_loop(void *scheduler) {
                 continue;
             }
         }
+        else {
+            s->idle_count = 0;
+        }
 
-        s->idle_count = 0;
         a->timeslice_remaining = TIMESLICE_SIZE;
 
         struct Message *message = a->mail->head->next;
@@ -143,16 +147,7 @@ void *scheduler_loop(void *scheduler) {
 
             if (a->actor_state == ACTOR_STATE_IDLE) {
                 struct Message *m = dequeue_msg(a->mail);
-                if (a->mail->delay_msg_delete != NULL) {
 
-                    if (s->cache_msg != NULL) {
-                        free(a->mail->delay_msg_delete);
-                    }
-                    else {
-                        s->cache_msg = a->mail->delay_msg_delete;
-                    }
-                }
-                a->mail->delay_msg_delete = m;
                 message = a->mail->head->next;
             }
             else {

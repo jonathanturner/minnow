@@ -17,9 +17,9 @@ union Age {
 };
 
 struct Work_Queue {
-    struct Actor *actor_deq[DEQUEUE_SIZE];
-    union Age age;
-    int bot;
+    volatile struct Actor *actor_deq[DEQUEUE_SIZE];
+    volatile union Age age;
+    volatile int bot;
 };
 
 struct Actor *pop_top_actor(struct Work_Queue *work_queue);

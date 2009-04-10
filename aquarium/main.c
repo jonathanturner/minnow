@@ -9,6 +9,28 @@
 #include "concurrency.h"
 #include "scheduler.h"
 
+
+struct Scheduler *create_all_schedulers(int count) {
+    if (count < 1) {
+        printf("Number of schedulers must be at least one.\n");
+        exit(1);
+    }
+    struct Scheduler **s = (struct Scheduler **)malloc(sizeof(struct Scheduler *) * count);
+
+    int i;
+    for (i = 0; i < count; ++i) {
+        s[i] = create_scheduler();
+        printf("Created scheduler: %p\n", s[i]);
+    }
+
+    for (i = 0; i < count; ++i) {
+        s[i]->schedulers = s;
+        s[i]->num_schedulers = count;
+    }
+
+    return s[0];
+}
+
 /*
 struct Counter {
     struct Actor actor;
@@ -54,26 +76,6 @@ struct Counter *create_counter() {
     return retval;
 }
 
-struct Scheduler *create_all_schedulers(int count) {
-    if (count < 1) {
-        printf("Number of schedulers must be at least one.\n");
-        exit(1);
-    }
-    struct Scheduler **s = (struct Scheduler **)malloc(sizeof(struct Scheduler *) * count);
-
-    int i;
-    for (i = 0; i < count; ++i) {
-        s[i] = create_scheduler();
-        printf("Created scheduler: %p\n", s[i]);
-    }
-
-    for (i = 0; i < count; ++i) {
-        s[i]->schedulers = s;
-        s[i]->num_schedulers = count;
-    }
-
-    return s[0];
-}
 
 int main() {
     printf("Hello: %i\n", num_hw_threads());
@@ -135,6 +137,7 @@ int msg_pass(struct Message *message) {
 
         struct Message *m;
 
+        /*
         if (s->cache_msg != NULL) {
             m = s->cache_msg;
             s->cache_msg = NULL;
@@ -143,10 +146,11 @@ int msg_pass(struct Message *message) {
         }
 
         else {
+        */
             //printf("creating a message for %i\n", token);
 
             m = create_message();
-        }
+        //}
 
         m->task = msg_pass;
         m->recipient = this_ptr->next;
@@ -157,6 +161,7 @@ int msg_pass(struct Message *message) {
         msg_actor(message->scheduler, this_ptr->next, m);
     }
 
+    this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
     return TASK_DONE;
 }
 
@@ -168,13 +173,14 @@ int msg_setIdAndNext(struct Message *message) {
     this_ptr->id = id;
     this_ptr->next = next;
 
+    this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
     return TASK_DONE;
 }
 
 int main(int argc, char *argv[]) {
     int loop_amount = atoi(argv[1]);
 
-    struct Scheduler *s = create_scheduler();
+    struct Scheduler *s = create_all_schedulers(num_hw_threads());
     int i;
 
     struct Passer *head = create_passer();
@@ -211,9 +217,92 @@ int main(int argc, char *argv[]) {
 
     msg_actor(s, head, m);
 
+    for (i = 1; i < s->num_schedulers; ++i) {
+        create_thread(scheduler_loop, s->schedulers[i]);
+    }
     scheduler_loop(s);
 
     return 0;
 }
 
+/*
+#define BIGBANG_SIZE 2500
 
+struct BigBang {
+    struct Actor actor;
+};
+
+struct BigBang *create_bigbang() {
+    struct BigBang *retval = (struct BigBang *)malloc(sizeof(struct BigBang));
+    initialize_actor(&(retval->actor));
+
+    return retval;
+}
+
+int msg_recv(struct Message *message) {
+    struct BigBang *this_ptr = (struct BigBang *)(message->recipient);
+
+    //free(message);
+
+    this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
+    return TASK_DONE;
+}
+
+int msg_send_all(struct Message *message) {
+    struct Scheduler *s = (struct Scheduler *)message->scheduler;
+    struct BigBang *this_ptr = (struct BigBang *)(message->recipient);
+
+    int id = message->args[0].Int32;
+    struct BigBang **actor_list = message->args[1].VoidPtr;
+
+    int i;
+    for (i = 0; i < BIGBANG_SIZE; ++i) {
+        struct Message *m;
+
+        m = create_message();
+
+        m->task = msg_recv;
+        m->recipient = actor_list[i];
+
+        //printf("Actor %p is messaging %i to %p\n", this_ptr, token, this_ptr->next);
+
+        msg_actor(message->scheduler, actor_list[i], m);
+    }
+    //printf("Actor %i done messaging\n", id);
+    this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
+
+    return TASK_DONE;
+}
+
+int main(int argc, char *argv[]) {
+    //int loop_amount = atoi(argv[1]);
+
+    struct Scheduler *s = create_all_schedulers(num_hw_threads());
+    int i;
+    struct Message *m;
+
+    struct BigBang **bigbangs = (struct BigBang **)malloc(BIGBANG_SIZE * sizeof(struct BigBang*));
+
+    for (i = 0; i < BIGBANG_SIZE; ++i) {
+        bigbangs[i] = create_bigbang();
+    }
+
+    for (i = 0; i < BIGBANG_SIZE; ++i) {
+
+        m = create_message();
+        m->task = msg_send_all;
+        m->recipient = bigbangs[i];
+        m->args[0].Int32 = i;
+        m->args[1].VoidPtr = bigbangs;
+
+        msg_actor(s, bigbangs[i], m);
+    }
+
+    for (i = 1; i < s->num_schedulers; ++i) {
+        create_thread(scheduler_loop, s->schedulers[i]);
+    }
+    scheduler_loop(s);
+
+    return 0;
+}
+*/
