@@ -107,7 +107,7 @@ struct Scheduler *create_all_schedulers(int count) {
     int i;
     for (i = 0; i < count; ++i) {
         s[i] = create_scheduler();
-        printf("Created scheduler: %p\n", s[i]);
+        //printf("Created scheduler: %p\n", s[i]);
     }
 
     for (i = 0; i < count; ++i) {
@@ -128,18 +128,18 @@ void *scheduler_loop(void *scheduler) {
         if (a == NULL) {
             //if ((s->work_queues[0]->bot == s->work_queues[0]->age.Packed.top) &&
             //        (s->work_queues[1]->bot == s->work_queues[1]->age.Packed.top)) {
-            //if ((is_empty(s->work_queues[0])) && (is_empty(s->work_queues[1]))) {
-            if ((s->work_queues[0]->bot == 0) &&
-                    (s->work_queues[1]->bot == 0)) {
+            if ((is_empty(s->work_queues[0])) && (is_empty(s->work_queues[1]))) {
+            //if ((s->work_queues[0]->bot == 0) &&
+            //        (s->work_queues[1]->bot == 0)) {
                 while (a == NULL) {
                     a = steal_actor(s);
                     if (a != NULL) {
                         a->scheduler = s;
                         s->idle_count = 0;
-                        printf("+++ Steal successful for %p +++\n", s);
+                        //printf("+++ Steal %p successful for %p +++\n", a, s);
                         break;
                     }
-                    printf("--- Steal failed for %p ---\n", s);
+                    //printf("--- Steal failed for %p ---\n", s);
                     sleep_in_ms(15);
                     ++s->idle_count;
                     //arbitrary count limit
