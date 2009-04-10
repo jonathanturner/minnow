@@ -21,7 +21,7 @@ inline CBOOL atomic_cas(volatile void **orig, volatile void *cmp, volatile void 
     return __sync_bool_compare_and_swap(orig, cmp, new);
 }
 
-inline CBOOL atomic_cas_int(int *orig, int cmp, int new) {
+inline CBOOL atomic_cas_int(volatile int *orig, int cmp, int new) {
     //printf("CAS Int\n");
     return __sync_bool_compare_and_swap(orig, cmp, new);
 }
