@@ -24,6 +24,7 @@ struct Work_Queue {
 
 struct Actor *pop_top_actor(struct Work_Queue *work_queue);
 struct Actor *pop_bottom_actor(struct Work_Queue *work_queue);
+CBOOL is_empty(struct Work_Queue *work_queue);
 
 struct Work_Queue *create_work_queue();
 

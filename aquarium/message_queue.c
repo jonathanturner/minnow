@@ -67,7 +67,7 @@ struct Message *dequeue_msg(struct Message_Queue *queue) {
                 struct Message *retval = next;
                 struct Message *delslot = queue->head;
                 if (atomic_msg_cas(&(queue->head), first, next)) {
-                    free(delslot);
+                    free(first);
                     return retval;
                 }
             }
@@ -87,8 +87,6 @@ struct Message_Queue *create_message_queue() {
     struct Message *guard = create_message();
     retval->head = guard;
     retval->tail = guard;
-
-    retval->delay_msg_delete = NULL;
 
     return retval;
 }

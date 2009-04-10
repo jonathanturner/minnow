@@ -137,20 +137,7 @@ int msg_pass(struct Message *message) {
 
         struct Message *m;
 
-        /*
-        if (s->cache_msg != NULL) {
-            m = s->cache_msg;
-            s->cache_msg = NULL;
-            m->scheduler = NULL;
-            m->next = NULL;
-        }
-
-        else {
-        */
-            //printf("creating a message for %i\n", token);
-
-            m = create_message();
-        //}
+        m = create_message();
 
         m->task = msg_pass;
         m->recipient = this_ptr->next;

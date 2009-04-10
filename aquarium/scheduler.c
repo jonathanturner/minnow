@@ -33,11 +33,12 @@ void push_bottom_actor(void *scheduler, void *actor) {
     struct Actor *a = (struct Actor*) actor;
     struct Work_Queue *wq = s->work_queues[s->which_active];
 
-    int local_bottom = wq->bot;
-    wq->actor_deq[local_bottom] = a;
-    ++local_bottom;
+    //int local_bottom = wq->bot;
+    wq->actor_deq[wq->bot] = a;
+    ++wq->bot;
+    //++local_bottom;
     //wq->bot = local_bottom;
-    atomic_cas_int(&(wq->bot), wq->bot, local_bottom);
+    //atomic_cas_int(&(wq->bot), wq->bot, local_bottom);
 }
 
 void push_bottom_actor_to_alt(void *scheduler, void *actor) {
@@ -53,11 +54,12 @@ void push_bottom_actor_to_alt(void *scheduler, void *actor) {
 
     wq = s->work_queues[alt];
 
-    int local_bottom = wq->bot;
-    wq->actor_deq[local_bottom] = a;
-    ++local_bottom;
+    //int local_bottom = wq->bot;
+    wq->actor_deq[wq->bot] = a;
+    ++wq->bot;
+    //++local_bottom;
     //wq->bot = local_bottom;
-    atomic_cas_int(&(wq->bot), wq->bot, local_bottom);
+    //atomic_cas_int(&(wq->bot), wq->bot, local_bottom);
 }
 
 struct Actor *steal_actor(struct Scheduler *scheduler) {
@@ -71,7 +73,8 @@ struct Actor *steal_actor(struct Scheduler *scheduler) {
         int j;
         //When we try our victim, we try both of its work queues so, in essence, we are actually stealing from either "side".
         for (j = 0; j < 2; ++j) {
-            if ((victim->work_queues[j]->bot - victim->work_queues[j]->age.Packed.top) >= 1) {
+            //if ((victim->work_queues[j]->bot - victim->work_queues[j]->age.Packed.top) >= 1) {
+            if (!is_empty(victim->work_queues[j])) {
                 retval = pop_top_actor(victim->work_queues[j]);
                 if (retval != NULL) {
                     return retval;
@@ -80,7 +83,7 @@ struct Actor *steal_actor(struct Scheduler *scheduler) {
         }
     }
 
-    return retval;
+    return NULL;
 }
 
 CBOOL check_for_all_schedulers_idle(struct Scheduler *scheduler) {
@@ -102,11 +105,20 @@ void *scheduler_loop(void *scheduler) {
         a = pop_bottom_actor(s->work_queues[s->which_active]);
 
         if (a == NULL) {
-            if ((s->work_queues[0]->bot == s->work_queues[0]->age.Packed.top) &&
-                    (s->work_queues[1]->bot == s->work_queues[1]->age.Packed.top)) {
-                a = steal_actor(s);
-                if (a == NULL) {
-                    printf("--- Steal failed for %p ---\n", s);
+            //if ((s->work_queues[0]->bot == s->work_queues[0]->age.Packed.top) &&
+            //        (s->work_queues[1]->bot == s->work_queues[1]->age.Packed.top)) {
+            //if ((is_empty(s->work_queues[0])) && (is_empty(s->work_queues[1]))) {
+            if ((s->work_queues[0]->bot == 0) &&
+                    (s->work_queues[1]->bot == 0)) {
+                while (a == NULL) {
+                    a = steal_actor(s);
+                    if (a != NULL) {
+                        a->scheduler = s;
+                        s->idle_count = 0;
+                        printf("+++ Steal successful for %p +++\n", s);
+                        break;
+                    }
+                    //printf("--- Steal failed for %p ---\n", s);
                     sleep_in_ms(15);
                     ++s->idle_count;
                     //arbitrary count limit
@@ -116,12 +128,6 @@ void *scheduler_loop(void *scheduler) {
                             exit(0);
                         }
                     }
-                    continue;
-                }
-                else {
-                    a->scheduler = s;
-                    s->idle_count = 0;
-                    printf("+++ Steal successful for %p +++\n", s);
                 }
             }
             else {
@@ -146,7 +152,7 @@ void *scheduler_loop(void *scheduler) {
             message->task(message);
 
             if (a->actor_state == ACTOR_STATE_IDLE) {
-                struct Message *m = dequeue_msg(a->mail);
+                dequeue_msg(a->mail);
 
                 message = a->mail->head->next;
             }
