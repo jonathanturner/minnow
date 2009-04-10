@@ -97,6 +97,27 @@ CBOOL check_for_all_schedulers_idle(struct Scheduler *scheduler) {
     return retval;
 }
 
+struct Scheduler *create_all_schedulers(int count) {
+    if (count < 1) {
+        printf("Number of schedulers must be at least one.\n");
+        exit(1);
+    }
+    struct Scheduler **s = (struct Scheduler **)malloc(sizeof(struct Scheduler *) * count);
+
+    int i;
+    for (i = 0; i < count; ++i) {
+        s[i] = create_scheduler();
+        printf("Created scheduler: %p\n", s[i]);
+    }
+
+    for (i = 0; i < count; ++i) {
+        s[i]->schedulers = s;
+        s[i]->num_schedulers = count;
+    }
+
+    return s[0];
+}
+
 void *scheduler_loop(void *scheduler) {
     struct Scheduler *s = (struct Scheduler*)scheduler;
     struct Actor *a = NULL;
