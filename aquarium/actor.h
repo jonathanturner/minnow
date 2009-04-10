@@ -9,8 +9,9 @@
 #include "common.h"
 #include "message_queue.h"
 
-#define ACTOR_STATE_IDLE    1
-#define ACTOR_STATE_BUSY    2
+#define ACTOR_STATE_IDLE            1
+#define ACTOR_STATE_SCHEDULED       2
+#define ACTOR_STATE_MSG             3
 
 struct Actor {
     struct Message_Queue *mail;

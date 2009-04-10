@@ -12,9 +12,9 @@
 
 struct Message {
     Type_Union args[8];
-    void (*task)(struct Message *msg);
+    CBOOL (*task)(struct Message *msg);
     void *recipient;
-    void *scheduler;
+    //void *scheduler;
     struct Message *next;
 };
 

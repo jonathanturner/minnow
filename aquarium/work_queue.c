@@ -100,7 +100,9 @@ struct Actor *pop_bottom_actor(struct Work_Queue *work_queue) {
 }
 
 CBOOL is_empty(struct Work_Queue *work_queue) {
-    return (work_queue->age.Packed.top >= work_queue->bot);
+    int top = work_queue->age.Packed.top;
+    int bot = work_queue->bot;
+    return (top >= bot);
 }
 
 struct Work_Queue *create_work_queue() {

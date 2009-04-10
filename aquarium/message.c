@@ -17,7 +17,7 @@ struct Message *create_message() {
 
     retval->next = NULL;
     retval->recipient = NULL;
-    retval->scheduler = NULL;
+    //retval->scheduler = NULL;
 
     return retval;
 }

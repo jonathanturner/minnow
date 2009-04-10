@@ -86,6 +86,48 @@ struct Actor *steal_actor(struct Scheduler *scheduler) {
     return NULL;
 }
 
+void take_actor_if_idle(struct Scheduler *s, struct Actor *a) {
+    while (1) {
+        switch (a->actor_state) {
+            case (ACTOR_STATE_IDLE) : {
+                if (atomic_cas_int(&(a->actor_state), ACTOR_STATE_IDLE, ACTOR_STATE_SCHEDULED)) {
+                    //successfully taken
+                    atomic_cas_int(&(a->actor_state), ACTOR_STATE_SCHEDULED, ACTOR_STATE_MSG);
+                    a->scheduler = s;
+                    push_bottom_actor(s, a);
+                    return;
+                }
+                /*
+                else {
+                    if (atomic_cas_int(&(a->actor_state), ACTOR_STATE_SCHEDULED, ACTOR_STATE_MSG)) {
+                        return;
+                    }
+                }
+                */
+            }
+            break;
+            case (ACTOR_STATE_SCHEDULED) : {
+                if (atomic_cas_int(&(a->actor_state), ACTOR_STATE_SCHEDULED, ACTOR_STATE_MSG)) {
+                    return;
+                }
+            }
+            break;
+            default : {
+                return;
+            }
+        }
+    }
+}
+
+void msg_actor(void *scheduler, void *actor, void *msg) {
+    struct Scheduler *s = (struct Scheduler *)scheduler;
+    struct Actor *a = (struct Actor *)actor;
+    struct Message *m = (struct Message *)msg;
+
+    enqueue_msg(a->mail, m);
+    take_actor_if_idle(s, a);
+}
+
 CBOOL check_for_all_schedulers_idle(struct Scheduler *scheduler) {
     int i;
     CBOOL retval = CTRUE;
@@ -168,34 +210,32 @@ void *scheduler_loop(void *scheduler) {
 
         struct Message *message = a->mail->head->next;
         while ((a->timeslice_remaining > 0) && (message != NULL)) {
-            message->scheduler = s;
+            //message->scheduler = s;
 
-            message->task(message);
-
-            if (a->actor_state == ACTOR_STATE_IDLE) {
+            if (message->task(message)) {
                 dequeue_msg(a->mail);
-
                 message = a->mail->head->next;
+                if (message == NULL) {
+                    atomic_cas_int(&(a->actor_state), ACTOR_STATE_MSG, ACTOR_STATE_SCHEDULED);
+                }
             }
             else {
                 break;
             }
         }
-        if (message != NULL) {
+        if (a->mail->head->next != NULL) {
             push_bottom_actor_to_alt(s, a);
+        }
+        else {
+            if (!atomic_cas_int(&(a->actor_state), ACTOR_STATE_SCHEDULED, ACTOR_STATE_IDLE)) {
+                printf("FAILED TO CAS: %p state: %i sched: %p  me: %p\n", a, a->actor_state, a->scheduler, s);
+
+                push_bottom_actor_to_alt(s, a);
+            }
         }
     }
 
     return NULL;
 }
 
-void msg_actor(void *scheduler, void *actor, void *msg) {
-    struct Scheduler *s = (struct Scheduler *)scheduler;
-    struct Actor *a = (struct Actor *)actor;
-    struct Message *m = (struct Message *)msg;
 
-    if (enqueue_msg(a->mail, m)) {
-        a->scheduler = s;
-        push_bottom_actor(s, a);
-    }
-}

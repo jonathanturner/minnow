@@ -22,7 +22,7 @@ inline CBOOL atomic_msg_cas(struct Message **orig, struct Message *cmp, struct M
 /**
  * Messages the actor, and returns whether or not the message was the first msg to the actor
  */
-CBOOL enqueue_msg(struct Message_Queue *queue, struct Message *message) {
+void enqueue_msg(struct Message_Queue *queue, struct Message *message) {
     /*
     CBOOL retval;
 
@@ -39,22 +39,13 @@ CBOOL enqueue_msg(struct Message_Queue *queue, struct Message *message) {
             if (next == NULL) {
                 if (atomic_msg_cas(&(last->next), next, message)) {
                     atomic_msg_cas(&(queue->tail), last, message);
-
-                    //todo: FIXME- this suffers from ABA problem
-                    if (queue->head->next == message) {
-                        return CTRUE;
-                    }
-                    else {
-                        return CFALSE;
-                    }
-                    //return retval;
+                    return;
                 }
             }
             else {
                 atomic_msg_cas(&(queue->tail), last, next);
             }
         }
-        //retval = CFALSE;
     }
 }
 

@@ -9,7 +9,7 @@
 #include "concurrency.h"
 #include "scheduler.h"
 
-#define THREADRING_SIZE 503
+#define THREADRING_SIZE 2001
 
 struct Passer {
     struct Actor actor;
@@ -26,9 +26,10 @@ struct Passer *create_passer() {
     return retval;
 }
 
-int msg_pass(struct Message *message) {
-    struct Scheduler *s = (struct Scheduler *)message->scheduler;
+CBOOL msg_pass(struct Message *message) {
+    //struct Scheduler *s = (struct Scheduler *)message->scheduler;
     struct Passer *this_ptr = (struct Passer *)(message->recipient);
+    struct Scheduler *s = (struct Scheduler *)(this_ptr->actor.scheduler);
     int token = message->args[0].Int32;
 
     if (token == 0) {
@@ -48,14 +49,14 @@ int msg_pass(struct Message *message) {
 
         //printf("Actor %p is messaging %i to %p\n", this_ptr, token, this_ptr->next);
 
-        msg_actor(message->scheduler, this_ptr->next, m);
+        msg_actor(s, this_ptr->next, m);
     }
 
-    this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
-    return TASK_DONE;
+    //this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
+    return CTRUE;
 }
 
-int msg_setIdAndNext(struct Message *message) {
+CBOOL msg_setIdAndNext(struct Message *message) {
     struct Passer *this_ptr = (struct Passer *)(message->recipient);
     int id = message->args[0].Int32;
     struct Passer *next = message->args[1].VoidPtr;
@@ -63,8 +64,8 @@ int msg_setIdAndNext(struct Message *message) {
     this_ptr->id = id;
     this_ptr->next = next;
 
-    this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
-    return TASK_DONE;
+    //this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
+    return CTRUE;
 }
 
 int main(int argc, char *argv[]) {
@@ -79,7 +80,6 @@ int main(int argc, char *argv[]) {
 
     for (i = 1; i < THREADRING_SIZE; ++i) {
         struct Passer *next = create_passer();
-
 
         m = create_message();
         m->task = msg_setIdAndNext;

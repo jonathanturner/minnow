@@ -27,7 +27,7 @@ struct BigBang *create_bigbang() {
     return retval;
 }
 
-int msg_recv(struct Message *message) {
+CBOOL msg_recv(struct Message *message) {
     struct BigBang *this_ptr = (struct BigBang *)(message->recipient);
 
     //free(message);
@@ -36,13 +36,14 @@ int msg_recv(struct Message *message) {
         printf("Id: %i reached goal of %i\n", this_ptr->id, this_ptr->total_recv);
     }
 
-    this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
-    return TASK_DONE;
+    //this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
+    return CTRUE;
 }
 
-int msg_send_all(struct Message *message) {
-    struct Scheduler *s = (struct Scheduler *)message->scheduler;
+CBOOL msg_send_all(struct Message *message) {
+    //struct Scheduler *s = (struct Scheduler *)message->scheduler;
     struct BigBang *this_ptr = (struct BigBang *)(message->recipient);
+    struct Scheduler *s = (struct Scheduler *)(this_ptr->actor.scheduler);
 
     int id = message->args[0].Int32;
     struct BigBang **actor_list = message->args[1].VoidPtr;
@@ -58,12 +59,12 @@ int msg_send_all(struct Message *message) {
 
         //printf("Actor %p is messaging %i to %p\n", this_ptr, token, this_ptr->next);
 
-        msg_actor(message->scheduler, actor_list[i], m);
+        msg_actor(s, actor_list[i], m);
     }
     printf("Actor %i done messaging\n", id);
-    this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
+    //this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
 
-    return TASK_DONE;
+    return CTRUE;
 }
 
 int main(int argc, char *argv[]) {
