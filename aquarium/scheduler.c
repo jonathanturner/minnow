@@ -118,7 +118,7 @@ void *scheduler_loop(void *scheduler) {
                         printf("+++ Steal successful for %p +++\n", s);
                         break;
                     }
-                    //printf("--- Steal failed for %p ---\n", s);
+                    printf("--- Steal failed for %p ---\n", s);
                     sleep_in_ms(15);
                     ++s->idle_count;
                     //arbitrary count limit

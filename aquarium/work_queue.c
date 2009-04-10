@@ -64,12 +64,14 @@ struct Actor *pop_top_actor(struct Work_Queue *work_queue) {
     ++new_age.Packed.top;
 
     if (work_queue->bot <= old_age.Packed.top) {
+        //printf("BOT TOP FAIL: %i vs %i\n", work_queue->bot, old_age.Packed.top);
         return NULL;
     }
     struct Actor *retval = work_queue->actor_deq[old_age.Packed.top];
     if (atomic_cas_int(&work_queue->age, old_age.Int, new_age.Int)) {
         return retval;
     }
+    //printf("ATOMIC FAIL\n");
     return NULL;
 }
 
@@ -98,7 +100,7 @@ struct Actor *pop_bottom_actor(struct Work_Queue *work_queue) {
 }
 
 CBOOL is_empty(struct Work_Queue *work_queue) {
-    return (work_queue->age.Packed.top < work_queue->bot);
+    return (work_queue->age.Packed.top >= work_queue->bot);
 }
 
 struct Work_Queue *create_work_queue() {

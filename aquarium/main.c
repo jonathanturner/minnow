@@ -106,6 +106,7 @@ int main() {
 }
 */
 
+/*
 #define THREADRING_SIZE 503
 
 struct Passer {
@@ -211,17 +212,23 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+*/
 
-/*
-#define BIGBANG_SIZE 2500
+
+#define BIGBANG_SIZE 1500
 
 struct BigBang {
     struct Actor actor;
+
+    int total_recv;
+    int id;
 };
 
 struct BigBang *create_bigbang() {
     struct BigBang *retval = (struct BigBang *)malloc(sizeof(struct BigBang));
     initialize_actor(&(retval->actor));
+
+    retval->total_recv = 0;
 
     return retval;
 }
@@ -230,6 +237,10 @@ int msg_recv(struct Message *message) {
     struct BigBang *this_ptr = (struct BigBang *)(message->recipient);
 
     //free(message);
+    ++this_ptr->total_recv;
+    if (this_ptr->total_recv == (BIGBANG_SIZE)) {
+        printf("Id: %i reached goal of %i\n", this_ptr->id, this_ptr->total_recv);
+    }
 
     this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
     return TASK_DONE;
@@ -255,7 +266,7 @@ int msg_send_all(struct Message *message) {
 
         msg_actor(message->scheduler, actor_list[i], m);
     }
-    //printf("Actor %i done messaging\n", id);
+    printf("Actor %i done messaging\n", id);
     this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
 
     return TASK_DONE;
@@ -272,6 +283,7 @@ int main(int argc, char *argv[]) {
 
     for (i = 0; i < BIGBANG_SIZE; ++i) {
         bigbangs[i] = create_bigbang();
+        bigbangs[i]->id = i;
     }
 
     for (i = 0; i < BIGBANG_SIZE; ++i) {
@@ -292,4 +304,4 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-*/
+
