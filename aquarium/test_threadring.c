@@ -9,7 +9,7 @@
 #include "concurrency.h"
 #include "scheduler.h"
 
-#define THREADRING_SIZE 2001
+#define THREADRING_SIZE 503
 
 struct Passer {
     struct Actor actor;
