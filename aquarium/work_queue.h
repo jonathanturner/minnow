@@ -5,6 +5,7 @@
 #define WORK_QUEUE_H_
 
 #include "actor.h"
+#include "concurrency.h"
 
 #define DEQUEUE_SIZE 100000
 
@@ -17,13 +18,14 @@ union Age {
 };
 
 struct Work_Queue {
-    volatile struct Actor *actor_deq[DEQUEUE_SIZE];
-    volatile union Age age;
-    volatile int bot;
+    struct Actor *head;
+    struct Actor *tail;
+
+    void *mutex_lock;
 };
 
-struct Actor *pop_top_actor(struct Work_Queue *work_queue);
-struct Actor *pop_bottom_actor(struct Work_Queue *work_queue);
+void enqueue_actor(struct Work_Queue *work_queue, struct Actor *actor);
+struct Actor *dequeue_actor(struct Work_Queue *work_queue);
 CBOOL is_empty(struct Work_Queue *work_queue);
 
 struct Work_Queue *create_work_queue();

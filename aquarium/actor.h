@@ -18,6 +18,8 @@ struct Actor {
     void *scheduler;
     int timeslice_remaining;
     volatile int actor_state;
+
+    struct Actor *next;
 };
 
 //public API

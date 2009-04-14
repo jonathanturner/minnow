@@ -22,57 +22,43 @@ inline CBOOL atomic_msg_cas(struct Message **orig, struct Message *cmp, struct M
 /**
  * Messages the actor, and returns whether or not the message was the first msg to the actor
  */
-void enqueue_msg(struct Message_Queue *queue, struct Message *message) {
-    /*
-    CBOOL retval;
+CBOOL enqueue_msg(struct Message_Queue *queue, struct Message *message) {
+    message->next = NULL;
+    CBOOL is_first = CFALSE;
 
-    if (queue->head->next == NULL)
-        retval = CTRUE;
-    else
-        retval = CFALSE;
-    */
-    while(CTRUE) {
-        volatile struct Message *last = queue->tail;
-        struct Message *next = last->next;
-
-        if (last == queue->tail) {
-            if (next == NULL) {
-                if (atomic_msg_cas(&(last->next), next, message)) {
-                    atomic_msg_cas(&(queue->tail), last, message);
-                    return;
-                }
-            }
-            else {
-                atomic_msg_cas(&(queue->tail), last, next);
-            }
+    lock_mutex(queue->mutex_lock);
+    {
+        if (queue->head == queue->tail) {
+            is_first = CTRUE;
         }
+        queue->tail->next = message;
+        queue->tail = message;
     }
+    unlock_mutex(queue->mutex_lock);
+
+    return is_first;
 }
 
-struct Message *dequeue_msg(struct Message_Queue *queue) {
+ CBOOL dequeue_msg(struct Message_Queue *queue) {
+    CBOOL retval = CFALSE;
+    struct Message *delslot = NULL;
 
-    while (CTRUE) {
-        volatile struct Message *first = queue->head;
-        volatile struct Message *last = queue->tail;
-        struct Message *next = first->next;
-
-        if (first == queue->head) {
-            if (first == last) {
-                if (next == NULL) {
-                    return NULL;
-                }
-                atomic_msg_cas(&(queue->tail), last, next);
-            }
-            else {
-                struct Message *retval = next;
-                struct Message *delslot = queue->head;
-                if (atomic_msg_cas(&(queue->head), first, next)) {
-                    free(first);
-                    return retval;
-                }
+    lock_mutex(queue->mutex_lock);
+    {
+        if (queue->head->next != NULL) {
+            delslot = queue->head;
+            queue->head = queue->head->next;
+            if (queue->head->next != NULL) {
+                retval = CTRUE;
             }
         }
     }
+    unlock_mutex(queue->mutex_lock);
+
+    if (delslot != NULL)
+        free(delslot);
+
+    return retval;
 }
 
 struct Message_Queue *create_message_queue() {
@@ -87,6 +73,8 @@ struct Message_Queue *create_message_queue() {
     struct Message *guard = create_message();
     retval->head = guard;
     retval->tail = guard;
+
+    retval->mutex_lock = create_mutex();
 
     return retval;
 }
