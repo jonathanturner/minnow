@@ -43,6 +43,7 @@ CBOOL msg_pass(struct Message *message) {
 
         m = create_message();
 
+        //printf("Passing: %p %i to %p\n", message->recipient, token, this_ptr->next);
         m->task = msg_pass;
         m->recipient = this_ptr->next;
         m->args[0].Int32 = token;
@@ -61,6 +62,7 @@ CBOOL msg_setIdAndNext(struct Message *message) {
     int id = message->args[0].Int32;
     struct Passer *next = message->args[1].VoidPtr;
 
+    //printf("Setting: %p to %i and %p\n", message->recipient, id, next);
     this_ptr->id = id;
     this_ptr->next = next;
 

@@ -28,6 +28,9 @@ struct Actor *dequeue_actor(struct Work_Queue *work_queue) {
     {
         if (work_queue->head->next != NULL) {
             retval = work_queue->head->next;
+            if (retval == work_queue->tail) {
+                work_queue->tail = work_queue->head;
+            }
             work_queue->head->next = work_queue->head->next->next;
         }
     }

@@ -75,6 +75,7 @@ void msg_actor(void *scheduler, void *actor, void *msg) {
     struct Message *m = (struct Message *)msg;
 
     if (enqueue_msg(a->mail, m)) {
+        //printf("Actor %p stolen on msging by %p\n", a, s);
         a->scheduler = s;
         enqueue_actor(s->work_queue, a);
     }
@@ -120,6 +121,7 @@ void *scheduler_loop(void *scheduler) {
     while (s->is_running) {
         //a = pop_bottom_actor(s->work_queues[s->which_active]);
         a = dequeue_actor(s->work_queue);
+        //printf("Scheduler: %p  activating actor: %p\n", s, a);
 
         while (a == NULL) {
             a = steal_actor(s);
@@ -149,12 +151,8 @@ void *scheduler_loop(void *scheduler) {
 
         if (message != NULL) {
             if (message->task(message)) {
-                if (a->mail->head->next->next != NULL) {
-                    dequeue_msg(a->mail);
+                if (dequeue_msg(a->mail)) {
                     enqueue_actor(s->work_queue, a);
-                }
-                else {
-                    dequeue_msg(a->mail);
                 }
             }
             else {

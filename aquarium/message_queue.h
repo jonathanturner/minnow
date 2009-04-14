@@ -14,7 +14,7 @@ struct Message_Queue {
 };
 
 CBOOL enqueue_msg(struct Message_Queue *queue, struct Message *message);
-struct Message *dequeue_msg(struct Message_Queue *queue);
+CBOOL dequeue_msg(struct Message_Queue *queue);
 
 struct Message_Queue *create_message_queue();
 
