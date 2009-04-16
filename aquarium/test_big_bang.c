@@ -14,6 +14,7 @@
 struct BigBang {
     struct Actor actor;
 
+    struct BigBang *collector;
     int total_recv;
     int id;
 };
@@ -27,16 +28,31 @@ struct BigBang *create_bigbang() {
     return retval;
 }
 
-CBOOL msg_recv(struct Message *message) {
+CBOOL msg_collect(struct Message *message) {
     struct BigBang *this_ptr = (struct BigBang *)(message->recipient);
 
-    //free(message);
     ++this_ptr->total_recv;
     if (this_ptr->total_recv == (BIGBANG_SIZE)) {
         //printf("Id: %i reached goal of %i\n", this_ptr->id, this_ptr->total_recv);
+        exit(0);
     }
 
-    //this_ptr->actor.actor_state = ACTOR_STATE_IDLE;
+    return CTRUE;
+}
+
+CBOOL msg_recv(struct Message *message) {
+    struct BigBang *this_ptr = (struct BigBang *)(message->recipient);
+    struct Scheduler *s = (struct Scheduler *)(this_ptr->actor.scheduler);
+
+    ++this_ptr->total_recv;
+    if (this_ptr->total_recv == (BIGBANG_SIZE)) {
+        //printf("Id: %i reached goal of %i\n", this_ptr->id, this_ptr->total_recv);
+        struct Message *m = create_message();
+        m->task = msg_collect;
+        m->recipient = this_ptr->collector;
+        msg_actor(s, this_ptr->collector, m);
+    }
+
     return CTRUE;
 }
 
@@ -74,11 +90,13 @@ int main(int argc, char *argv[]) {
     int i;
     struct Message *m;
 
+    struct BigBang *collector = create_bigbang();
     struct BigBang **bigbangs = (struct BigBang **)malloc(BIGBANG_SIZE * sizeof(struct BigBang*));
 
     for (i = 0; i < BIGBANG_SIZE; ++i) {
         bigbangs[i] = create_bigbang();
         bigbangs[i]->id = i;
+        bigbangs[i]->collector = collector;
     }
 
     for (i = 0; i < BIGBANG_SIZE; ++i) {
