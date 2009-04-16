@@ -41,12 +41,11 @@ CBOOL enqueue_msg(struct Message_Queue *queue, struct Message *message) {
 
  CBOOL dequeue_msg(struct Message_Queue *queue) {
     CBOOL retval = CFALSE;
-    struct Message *delslot = NULL;
+    //struct Message *delslot = NULL;
 
     lock_mutex(queue->mutex_lock);
     {
         if (queue->head->next != NULL) {
-            delslot = queue->head;
             queue->head = queue->head->next;
             if (queue->head->next != NULL) {
                 retval = CTRUE;
@@ -55,8 +54,10 @@ CBOOL enqueue_msg(struct Message_Queue *queue, struct Message *message) {
     }
     unlock_mutex(queue->mutex_lock);
 
+    /*
     if (delslot != NULL)
         free(delslot);
+    */
 
     return retval;
 }

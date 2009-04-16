@@ -23,7 +23,7 @@ struct Scheduler {
 
     volatile int idle_count;
 
-    struct Message *cache_msg;
+    struct Message *msg_cache;
 };
 
 struct Scheduler *create_scheduler();
@@ -31,5 +31,8 @@ void *scheduler_loop(void *scheduler);
 
 void msg_actor(void *scheduler, void *actor, void *msg);
 struct Scheduler *create_all_schedulers(int count);
+
+struct Message *get_free_message(void *scheduler);
+void recycle_message(void *scheduler, void *msg);
 
 #endif /* SCHEDULER_H_ */

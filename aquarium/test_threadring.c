@@ -41,7 +41,8 @@ CBOOL msg_pass(struct Message *message) {
 
         struct Message *m;
 
-        m = create_message();
+        //m = create_message();
+        m = get_free_message(s);
 
         //printf("Passing: %p %i to %p\n", message->recipient, token, this_ptr->next);
         m->task = msg_pass;
@@ -83,7 +84,8 @@ int main(int argc, char *argv[]) {
     for (i = 1; i < THREADRING_SIZE; ++i) {
         struct Passer *next = create_passer();
 
-        m = create_message();
+        //m = create_message();
+        m = get_free_message(s);
         m->task = msg_setIdAndNext;
         m->recipient = curr;
         m->args[0].Int32 = i;
@@ -94,7 +96,8 @@ int main(int argc, char *argv[]) {
         curr = next;
     }
 
-    m = create_message();
+    //m = create_message();
+    m = get_free_message(s);
     m->task = msg_setIdAndNext;
     m->recipient = curr;
     m->args[0].Int32 = THREADRING_SIZE;
@@ -110,7 +113,7 @@ int main(int argc, char *argv[]) {
     msg_actor(s, head, m);
 
     for (i = 1; i < s->num_schedulers; ++i) {
-        create_thread(scheduler_loop, s->schedulers[i]);
+        //create_thread(scheduler_loop, s->schedulers[i]);
     }
     scheduler_loop(s);
 

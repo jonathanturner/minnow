@@ -15,7 +15,7 @@ struct Scheduler *create_scheduler() {
 
     retval->idle_count = 0;
     retval->is_running = CTRUE;
-    retval->cache_msg = NULL;
+    retval->msg_cache = NULL;
 
     return retval;
 }
@@ -41,34 +41,6 @@ struct Actor *steal_actor(struct Scheduler *scheduler) {
     return NULL;
 }
 
-/*
-void take_actor_if_idle(struct Scheduler *s, struct Actor *a) {
-    while (1) {
-        switch (a->actor_state) {
-            case (ACTOR_STATE_IDLE) : {
-                if (atomic_cas_int(&(a->actor_state), ACTOR_STATE_IDLE, ACTOR_STATE_SCHEDULED)) {
-                    //successfully taken
-                    atomic_cas_int(&(a->actor_state), ACTOR_STATE_SCHEDULED, ACTOR_STATE_MSG);
-                    a->scheduler = s;
-                    push_bottom_actor(s, a);
-                    return;
-                }
-            }
-            break;
-            case (ACTOR_STATE_SCHEDULED) : {
-                if (atomic_cas_int(&(a->actor_state), ACTOR_STATE_SCHEDULED, ACTOR_STATE_MSG)) {
-                    return;
-                }
-            }
-            break;
-            default : {
-                return;
-            }
-        }
-    }
-}
-*/
-
 void msg_actor(void *scheduler, void *actor, void *msg) {
     struct Scheduler *s = (struct Scheduler *)scheduler;
     struct Actor *a = (struct Actor *)actor;
@@ -79,7 +51,29 @@ void msg_actor(void *scheduler, void *actor, void *msg) {
         a->scheduler = s;
         enqueue_actor(s->work_queue, a);
     }
-    //take_actor_if_idle(s, a);
+}
+
+struct Message *get_free_message(void *scheduler) {
+    struct Scheduler *s = (struct Scheduler *)scheduler;
+
+    if (s->msg_cache == NULL) {
+        return create_message();
+    }
+    else {
+        struct Message *m = s->msg_cache;
+        s->msg_cache = s->msg_cache->next;
+        m->next = NULL;
+        m->recipient = NULL;
+        return m;
+    }
+}
+
+void recycle_message(void *scheduler, void *msg){
+    struct Scheduler *s = (struct Scheduler *)scheduler;
+    struct Message *m = (struct Message *)msg;
+
+    m->next = s->msg_cache;
+    s->msg_cache = m;
 }
 
 CBOOL check_for_all_schedulers_idle(struct Scheduler *scheduler) {
@@ -151,8 +145,13 @@ void *scheduler_loop(void *scheduler) {
 
         if (message != NULL) {
             if (message->task(message)) {
+                struct Message *prev_head = a->mail->head;
                 if (dequeue_msg(a->mail)) {
                     enqueue_actor(s->work_queue, a);
+                }
+                if (prev_head != a->mail->head) {
+                    //message is complete, so recycle it
+                    recycle_message(s, prev_head);
                 }
             }
             else {
@@ -163,43 +162,6 @@ void *scheduler_loop(void *scheduler) {
             printf("INVARIANT OF NOT NULL NOT MET!!!\n");
             exit(1);
         }
-        /*
-        if ((a->timeslice_remaining > 0) && (message != NULL)) {
-            //message->scheduler = s;
-
-            if (message->task(message)) {
-                if (a->mail->head->next->next != NULL) {
-                    dequeue_msg(a->mail); */
-                /**
-                 * THIS IS A BUG TODO FIXME
-                 */
-                /*
-                message = a->mail->head->next;
-                if (message == NULL) {
-                    atomic_cas_int(&(a->actor_state), ACTOR_STATE_MSG, ACTOR_STATE_SCHEDULED);
-                }
-                */ /*
-            }
-            else {
-                break;
-            }
-        }
-        if (a->mail->head->next != NULL) {
-            //push_bottom_actor_to_alt(s, a);
-            enqueue_actor(s->work_queue, a);
-        }
-        */
-        /*
-        else {
-            if (!atomic_cas_int(&(a->actor_state), ACTOR_STATE_SCHEDULED, ACTOR_STATE_IDLE)) {
-                if (a->actor_state != ACTOR_STATE_MSG) {
-                    printf("FAILED TO CAS: %p state: %i sched: %p  me: %p\n", a, a->actor_state, a->scheduler, s);
-                }
-
-                push_bottom_actor_to_alt(s, a);
-            }
-        }
-        */
     }
 
     return NULL;
