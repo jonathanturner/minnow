@@ -147,11 +147,11 @@ void *scheduler_loop(void *scheduler) {
             if (message->task(message)) {
                 struct Message *prev_head = a->mail->head;
                 if (dequeue_msg(a->mail)) {
-                    enqueue_actor(s->work_queue, a);
-                    message = NULL;
+                    //enqueue_actor(s->work_queue, a);
+                    message = a->mail->head->next;
                 }
                 else {
-                    message = a->mail->head->next;
+                    message = NULL;
                 }
                 if (prev_head != a->mail->head) {
                     //message is complete, so recycle it
@@ -163,6 +163,11 @@ void *scheduler_loop(void *scheduler) {
                 message = NULL;
             }
         }
+        if (message != NULL) {
+            enqueue_actor(s->work_queue, a);
+        }
+
+        
         /*
         if (message != NULL) {
             if (message->task(message)) {
