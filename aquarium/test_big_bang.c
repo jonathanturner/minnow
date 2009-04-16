@@ -9,7 +9,7 @@
 #include "concurrency.h"
 #include "scheduler.h"
 
-#define BIGBANG_SIZE 1000
+#define BIGBANG_SIZE 4000
 
 struct BigBang {
     struct Actor actor;
