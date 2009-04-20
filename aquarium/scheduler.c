@@ -166,29 +166,6 @@ void *scheduler_loop(void *scheduler) {
         if (message != NULL) {
             enqueue_actor(s->work_queue, a);
         }
-
-        
-        /*
-        if (message != NULL) {
-            if (message->task(message)) {
-                struct Message *prev_head = a->mail->head;
-                if (dequeue_msg(a->mail)) {
-                    enqueue_actor(s->work_queue, a);
-                }
-                if (prev_head != a->mail->head) {
-                    //message is complete, so recycle it
-                    recycle_message(s, prev_head);
-                }
-            }
-            else {
-                enqueue_actor(s->work_queue, a);
-            }
-        }
-        else {
-            printf("INVARIANT OF NOT NULL NOT MET!!!\n");
-            exit(1);
-        }
-        */
     }
 
     return NULL;
