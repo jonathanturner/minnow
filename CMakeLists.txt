@@ -1,13 +1,17 @@
 cmake_minimum_required(VERSION 2.6)
 
-SET(CMAKE_BUILD_TYPE gdb)
-SET(CMAKE_C_FLAGS_GDB " -Wall -O3 -ggdb")
+SET (CMAKE_BUILD_TYPE gdb)
+SET (CMAKE_C_FLAGS_GDB " -Wall -ggdb")
+SET (CMAKE_CXX_FLAGS_GDB " -Wall -ggdb")
 
-INCLUDE_DIRECTORIES(aquarium libcoroutine)
-SET(AQUARIUM_SRCS aquarium/actor.c aquarium/message.c aquarium/message_queue.c 
+INCLUDE_DIRECTORIES (aquarium libcoroutine)
+SET (AQUARIUM_SRCS aquarium/actor.c aquarium/message.c aquarium/message_queue.c 
     aquarium/scheduler.c aquarium/work_queue.c)
 
 SET (AQUARIUM_LIBS )
+
+SET (AQUALISP_SRCS aqualisp/parser.cpp)
+
 #Platform ident hackery
 IF (WIN32)
   IF (MINGW)
@@ -53,3 +57,4 @@ TARGET_LINK_LIBRARIES(bin/test_threadring aquarium)
 ADD_EXECUTABLE(bin/test_big_bang aquarium/test_big_bang.c)
 TARGET_LINK_LIBRARIES(bin/test_big_bang aquarium)
 
+ADD_EXECUTABLE(bin/aqualisp ${AQUALISP_SRCS})
