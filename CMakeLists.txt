@@ -4,13 +4,13 @@ SET (CMAKE_BUILD_TYPE gdb)
 SET (CMAKE_C_FLAGS_GDB " -Wall -ggdb")
 SET (CMAKE_CXX_FLAGS_GDB " -Wall -ggdb")
 
-INCLUDE_DIRECTORIES (aquarium libcoroutine)
+INCLUDE_DIRECTORIES (aquarium aqualisp)
 SET (AQUARIUM_SRCS aquarium/actor.c aquarium/message.c aquarium/message_queue.c 
     aquarium/scheduler.c aquarium/work_queue.c)
 
 SET (AQUARIUM_LIBS )
 
-SET (AQUALISP_SRCS aqualisp/parser.cpp)
+SET (AQUALISP_SRCS aqualisp/parser.cpp aqualisp/utils.cpp)
 
 #Platform ident hackery
 IF (WIN32)
@@ -57,4 +57,4 @@ TARGET_LINK_LIBRARIES(bin/test_threadring aquarium)
 ADD_EXECUTABLE(bin/test_big_bang aquarium/test_big_bang.c)
 TARGET_LINK_LIBRARIES(bin/test_big_bang aquarium)
 
-ADD_EXECUTABLE(bin/aqualisp ${AQUALISP_SRCS})
+ADD_EXECUTABLE(bin/test_ali_parser ${AQUALISP_SRCS} aqualisp/test_ali_parser.cpp)
