@@ -16,6 +16,7 @@ struct Scheduler *create_scheduler() {
     retval->idle_count = 0;
     retval->is_running = CTRUE;
     retval->msg_cache = NULL;
+    retval->num_cache_msgs = 0;
 
     return retval;
 }
@@ -62,6 +63,7 @@ struct Message *get_free_message(void *scheduler) {
     else {
         struct Message *m = s->msg_cache;
         s->msg_cache = s->msg_cache->next;
+        --s->num_cache_msgs;
         m->next = NULL;
         m->recipient = NULL;
         return m;
@@ -72,8 +74,14 @@ void recycle_message(void *scheduler, void *msg){
     struct Scheduler *s = (struct Scheduler *)scheduler;
     struct Message *m = (struct Message *)msg;
 
-    m->next = s->msg_cache;
-    s->msg_cache = m;
+    //if (s->num_cache_msgs < MAX_MSG_CACHE) {
+        m->next = s->msg_cache;
+        s->msg_cache = m;
+        ++s->num_cache_msgs;
+    /*}
+    else {
+        free(msg);
+    }*/
 }
 
 CBOOL check_for_all_schedulers_idle(struct Scheduler *scheduler) {
