@@ -9,7 +9,7 @@
 #include "concurrency.h"
 #include "scheduler.h"
 
-#define BIGBANG_SIZE 4000
+#define BIGBANG_SIZE 2500
 
 struct BigBang {
     struct Actor actor;
@@ -47,7 +47,8 @@ CBOOL msg_recv(struct Message *message) {
     ++this_ptr->total_recv;
     if (this_ptr->total_recv == (BIGBANG_SIZE)) {
         //printf("Id: %i reached goal of %i\n", this_ptr->id, this_ptr->total_recv);
-        struct Message *m = create_message();
+        struct Message *m; // = create_message();
+        m = get_free_message(s);
         m->task = msg_collect;
         m->recipient = this_ptr->collector;
         msg_actor(s, this_ptr->collector, m);
