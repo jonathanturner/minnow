@@ -10,7 +10,7 @@ SET (AQUARIUM_SRCS aquarium/actor.c aquarium/message.c aquarium/message_queue.c
 
 SET (AQUARIUM_LIBS )
 
-SET (AQUALISP_SRCS aqualisp/parser.cpp aqualisp/utils.cpp)
+SET (AQUALISP_SRCS aqualisp/parser.cpp aqualisp/utils.cpp aqualisp/analyzer.cpp)
 
 #Platform ident hackery
 IF (WIN32)
@@ -58,3 +58,5 @@ ADD_EXECUTABLE(bin/test_big_bang aquarium/test_big_bang.c)
 TARGET_LINK_LIBRARIES(bin/test_big_bang aquarium)
 
 ADD_EXECUTABLE(bin/test_ali_parser ${AQUALISP_SRCS} aqualisp/test_ali_parser.cpp)
+
+ADD_EXECUTABLE(bin/test_ali_analyzer ${AQUALISP_SRCS} aqualisp/test_ali_analyzer.cpp)

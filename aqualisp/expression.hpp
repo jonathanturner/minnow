@@ -4,6 +4,8 @@
 #ifndef EXPRESSION_HPP_
 #define EXPRESSION_HPP_
 
+#include <string>
+#include <vector>
 #include <tr1/memory>
 
 #define ExPtr std::tr1::shared_ptr<Expression>
