@@ -2,6 +2,7 @@
 // See LICENSE.TXT for details.
 
 #include <iostream>
+#include <stdlib.h>
 
 #include "utils.hpp"
 

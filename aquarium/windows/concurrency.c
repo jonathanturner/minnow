@@ -14,6 +14,10 @@ struct Thread {
     DWORD thread_id;
 };
 
+struct Mutex {
+    CRITICAL_SECTION mutex_id;
+};
+
 struct Function_Package {
     void*(*func)(void*);
     void* arg;
@@ -31,15 +35,39 @@ inline CBOOL atomic_cas(volatile void **orig, volatile void *cmp, volatile void 
     return __sync_bool_compare_and_swap(orig, cmp, new);
 }
 
-inline CBOOL atomic_cas_int(int *orig, int cmp, int new) {
+inline CBOOL atomic_cas_int(volatile int *orig, int cmp, int new) {
     //printf("CAS Int\n");
     return __sync_bool_compare_and_swap(orig, cmp, new);
+}
+
+void *create_mutex() {
+    struct Mutex *m = (struct Mutex *)malloc(sizeof(struct Mutex));
+    InitializeCriticalSection(&m->mutex_id);
+
+    return m;
+}
+
+void delete_mutex(void *mutex) {
+    struct Mutex *m = (struct Mutex *)mutex;
+    DeleteCriticalSection(&m->mutex_id);
+
+    free(m);
+}
+
+void lock_mutex(void *mutex) {
+    struct Mutex *m = (struct Mutex *)mutex;
+    EnterCriticalSection(&m->mutex_id);
+}
+
+void unlock_mutex(void *mutex) {
+    struct Mutex *m = (struct Mutex *)mutex;
+    LeaveCriticalSection(&m->mutex_id);
 }
 
 void *create_thread(void*(*func)(void*), void* arg) {
     struct Thread *retval = (struct Thread*)malloc(sizeof(struct Thread));
     struct Function_Package *fp = (struct Function_Package *)malloc(sizeof(struct Function_Package));
-    
+
     fp->func = func;
     fp->arg = arg;
 
