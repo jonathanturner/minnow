@@ -8,10 +8,10 @@
 
 void debug_print(const ExPtr root, std::string prepend) {
     if (root->args.size() > 0) {
-        std::cout << prepend << '{' << root->token << '}' << std::endl;
+        std::cout << prepend << '{' << root->command << '}' << std::endl;
     }
     else {
-        std::cout << prepend << root->token << std::endl;
+        std::cout << prepend << root->command << std::endl;
     }
     for (unsigned int i = 0; i < root->args.size(); ++i) {
         debug_print(root->args[i], prepend+" ");
@@ -84,7 +84,7 @@ ExPtr parse(std::vector<std::string>::iterator &iter, std::vector<std::string>::
 
    if (*iter == "(") {
        ++iter;
-       p->token = *iter;
+       p->command = *iter;
        ++iter;
        while ((iter != end) && (*iter != ")"))  {
            ExPtr exp = parse(iter, end);
@@ -97,7 +97,7 @@ ExPtr parse(std::vector<std::string>::iterator &iter, std::vector<std::string>::
    }
 
    else if (*iter == "[") {
-       p->token = "list";
+       p->command = "list";
        ++iter;
        while ((iter != end) && (*iter != "]"))  {
            ExPtr exp = parse(iter, end);
@@ -109,7 +109,7 @@ ExPtr parse(std::vector<std::string>::iterator &iter, std::vector<std::string>::
        return p;
    }
    else {
-       p->token = *iter;
+       p->command = *iter;
        ++iter;
        return p;
    }

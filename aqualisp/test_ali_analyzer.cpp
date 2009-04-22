@@ -33,4 +33,8 @@ int main(int argc, char *argv[]) {
 
     debug_print(exp, "");
 
+    ProgPtr prog(new Program());
+    analyze_type_decl_pass(exp, prog);
+
+    debug_print(prog);
 }

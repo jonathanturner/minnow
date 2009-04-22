@@ -11,7 +11,7 @@
 #define ExPtr std::tr1::shared_ptr<Expression>
 
 struct Expression {
-    std::string token;
+    std::string command;
     std::vector<ExPtr > args;
 };
 

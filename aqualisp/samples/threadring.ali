@@ -1,33 +1,35 @@
 (defactor Passer
- (def Passer__id:int)
- (def Passer__next:Passer)
+ (def Passer__id int)
+ (def Passer__next Passer))
 
- (defaction pass [token:int]
-	(if (== token 0)
-	 (block
-		(printi Passer__id)
-		(exit))
-	 (block
-		(msg Passer__next pass [(- token 1)]))))
+(defaction Passer pass [token:int]
+ (if (== token 0)
+  (block
+   (printi Passer__id)
+   (exit))
+  (block
+   (msg Passer__next pass [(- token 1)]))))
 
- (defaction set_id_and_next [id:int next:Passer]
-	(set Passer__id id)
-	(set Passer__next next)))
+(defaction Passer set_id_and_next [(def id int) (def next Passer)]
+ (= Passer__id id)
+ (= Passer__next next))
 
-(defaction main [args:Array__string]
- (def head:Passer)
- (def curr:Passer)
- (def tmp_i:int)
+(defaction __Program__ main [(def args Array__string)]
+ (def head Passer)
+ (def curr Passer)
+ (def tmp_i int)
+ (def next Passer)
+ 
  (= head (spawn Passer []))
  (= curr head)
  (= tmp_i 1)
  (while (<= tmp_i 502)
-	(cont head curr tmp_i)
-	(block
-	 (def next:Passer (spawn Passer []))
-	 (msg curr set_id_and_next [tmp_i next])
-	 (= curr next)
-	 (= tmp_i (- tmp_i 1))))
+  (cont head curr tmp_i)
+  (block
+   (= next (spawn Passer []))
+   (msg curr set_id_and_next [tmp_i next])
+   (= curr next)
+   (= tmp_i (- tmp_i 1))))
  (msg curr set_id_and_next [503 head])
  (msg head pass (. (index args 0) to_int [])))
 
