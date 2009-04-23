@@ -23,18 +23,21 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> data = lex(d);
     //debug_print(data);
 
-    ExPtr exp;
+    ExPtr ex;
     std::vector<std::string>::iterator iter, end;
 
     iter = data.begin();
     end = data.end();
 
-    exp = parse(iter, end);
+    ex = parse(iter, end);
 
-    debug_print(exp, "");
+    debug_print(ex, "");
 
     ProgPtr prog(new Program());
-    analyze_type_decl_pass(exp, prog);
+    analyze_type_decl_pass(prog, ex);
+    analyze_type_def_pass(prog, ex);
+    analyze_func_decl_pass(prog, ex);
+    analyze_func_def_pass(prog, ex);
 
     debug_print(prog);
 }

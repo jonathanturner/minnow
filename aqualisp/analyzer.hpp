@@ -23,6 +23,10 @@ class Class_Type {
     public: enum Type {Actor, Struct};
 };
 
+class Function_Type {
+    public: enum Type {Action, Function, Method};
+};
+
 struct Type {
     std::string readable_name;
     Class_Type::Type type;
@@ -33,6 +37,7 @@ struct Type {
 
 struct Function {
     std::string readable_name;
+    Function_Type::Type type;
     std::map<std::string, int> variables;
     std::vector<int> parameter_types;
     int return_type;
@@ -50,10 +55,10 @@ struct Program {
 
 };
 
-void analyze_type_decl_pass(ExPtr ex, ProgPtr prog);
-void analyze_type_def_pass(ExPtr ex, ProgPtr prog);
-void analyze_func_decl_pass(ExPtr ex, ProgPtr prog);
-void analyze_func_def_pass(ExPtr ex, ProgPtr prog);
+void analyze_type_decl_pass(ProgPtr prog, ExPtr ex);
+void analyze_type_def_pass(ProgPtr prog, ExPtr ex);
+void analyze_func_decl_pass(ProgPtr prog, ExPtr ex);
+void analyze_func_def_pass(ProgPtr prog, ExPtr ex);
 
 void debug_print(VarPtr var);
 void debug_print(TypePtr type);
