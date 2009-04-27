@@ -28,8 +28,8 @@ std::vector<std::string> lex(std::string &s) {
     std::vector<std::string> ret_val;
     std::string::iterator iter = s.begin(), end = s.end(), leading;
 
-    ret_val.push_back("(");
-    ret_val.push_back("prog");
+    //ret_val.push_back("(");
+    //ret_val.push_back("prog");
 
     while (iter != end) {
         if (*iter == '(') {
@@ -70,7 +70,7 @@ std::vector<std::string> lex(std::string &s) {
         }
     }
 
-    ret_val.push_back(")");
+    //ret_val.push_back(")");
 
     return ret_val;
 }

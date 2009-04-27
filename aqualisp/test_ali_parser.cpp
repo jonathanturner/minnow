@@ -13,11 +13,11 @@ int main(int argc, char *argv[]) {
     std::string d;
 
     if (argc < 2) {
-       d  = "(+ 41 (inc [1 2])10)";
+       d  = "(prog (+ 41 (inc [1 2])10))";
     }
     else {
        std::cout << "Loading: " << argv[1] << std::endl;
-       d = load_file(argv[1]);
+       d = "(prog " + load_file(argv[1]) + ")";
     }
     data = lex(d);
     //debug_print(data);

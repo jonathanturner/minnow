@@ -103,7 +103,7 @@ void add_variable(ProgPtr prog, ExPtr ex) {
     }
     int type_id = find_type(prog, ex->args[1]->command);
     if (type_id == -1) {
-        std::cerr << "Can't find parent type '" << ex->args[1]->command << " for variable: " << ex->args[0]->command << std::endl;
+        std::cerr << "Can't find parent type '" << ex->args[1]->command << "' for variable: " << ex->args[0]->command << std::endl;
         exit(1);
     }
     int var_id = find_var(prog, ex->args[0]->command);
@@ -157,8 +157,8 @@ void analyze_type_decl_pass(ProgPtr prog, ExPtr ex) {
         if (arg->command == "defactor") {
             add_type(prog, arg, Class_Type::Actor);
         }
-        else if (arg->command == "defstruct") {
-            add_type(prog, arg, Class_Type::Struct);
+        else if (arg->command == "deftype") {
+            add_type(prog, arg, Class_Type::Basic);
         }
     }
 }
@@ -166,7 +166,7 @@ void analyze_type_decl_pass(ProgPtr prog, ExPtr ex) {
 void analyze_type_def_pass(ProgPtr prog, ExPtr ex) {
     for (unsigned int i = 0; i < ex->args.size(); ++i) {
         ExPtr arg = ex->args[i];
-        if ((arg->command == "defactor") || (arg->command == "defstruct")) {
+        if ((arg->command == "defactor") || (arg->command == "deftype")) {
             if (find_type(prog, arg->args[0]->command) != -1) {
                 TypePtr type = prog->types[find_type(prog, arg->args[0]->command)];
                 for (unsigned int j = 1; j < arg->args.size(); ++j) {

@@ -1,7 +1,7 @@
 (defactor bob
  (var x sam)
  (var y sam))
-(defstruct sam)
+(deftype sam)
 (defaction bob doaction [(var z sam)]
  (print "hello"))
 (defmethod bob domethod sam [(var a sam)]

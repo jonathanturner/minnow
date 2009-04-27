@@ -20,7 +20,7 @@ struct Variable {
 };
 
 class Class_Type {
-    public: enum Type {Actor, Struct};
+    public: enum Type {Actor, Basic};
 };
 
 class Function_Type {
