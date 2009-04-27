@@ -49,9 +49,9 @@ struct Program {
     std::vector<TypePtr> types;
     std::vector<FuncPtr> functions;
 
-    std::map<std::string, int> variable_lookup;
-    std::map<std::string, int> type_lookup;
-    std::map<std::string, int> function_lookup;
+    std::map<std::string, int > variable_lookup;
+    std::map<std::string, int > type_lookup;
+    std::map<std::string, int > function_lookup;
 
 };
 
@@ -60,9 +60,9 @@ void analyze_type_def_pass(ProgPtr prog, ExPtr ex);
 void analyze_func_decl_pass(ProgPtr prog, ExPtr ex);
 void analyze_func_def_pass(ProgPtr prog, ExPtr ex);
 
-void debug_print(VarPtr var);
-void debug_print(TypePtr type);
-void debug_print(FuncPtr func);
+void debug_print(ProgPtr prog, VarPtr var, std::string prepend);
+void debug_print(ProgPtr prog, TypePtr type, std::string prepend);
+void debug_print(ProgPtr prog, FuncPtr func, std::string prepend);
 void debug_print(ProgPtr prog);
 
 

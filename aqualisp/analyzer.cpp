@@ -8,37 +8,51 @@
 #include "analyzer.hpp"
 
 
-void debug_print(VarPtr var) {
-    std::cout << var->readable_name << " " << var->type << std::endl;
+void debug_print(ProgPtr prog, VarPtr var, std::string prepend) {
+    std::cout << prepend << var->readable_name << " : " << var->type << std::endl;
 }
 
-void debug_print(TypePtr type) {
-    std::cout << type->readable_name << " " << type->type << std::endl;
+void debug_print(ProgPtr prog, TypePtr type, std::string prepend) {
+    std::cout << prepend << type->readable_name << " " << type->type << std::endl;
+
+    for (std::map<std::string, int>::iterator iter = type->attributes.begin(), end = type->attributes.end(); iter != end; ++iter) {
+        std::cout << prepend;
+        debug_print(prog, prog->variables[iter->second], prepend + "  ");
+    }
+
+    for (std::map<std::string, int>::iterator iter = type->methods.begin(), end = type->methods.end(); iter != end; ++iter) {
+        debug_print(prog, prog->functions[iter->second], prepend + "  ");
+    }
 }
 
-void debug_print(FuncPtr func) {
-    std::cout << func->return_type << " " << func->readable_name << " [";
+void debug_print(ProgPtr prog, FuncPtr func, std::string prepend) {
+    std::cout << prepend << func->readable_name << " [";
     for (unsigned int i = 0; i < func->parameter_types.size(); ++i) {
         std::cout << func->parameter_types[i] << " ";
     }
-    std::cout << "]" << std::endl;
+    std::cout << "] : " << func->return_type << std::endl;
+
+    for (std::map<std::string, int>::iterator iter = func->variables.begin(), end = func->variables.end(); iter != end; ++iter) {
+        debug_print(prog, prog->variables[iter->second], prepend + "  ");
+    }
+
 }
 
 void debug_print(ProgPtr prog) {
     std::cout << "Variables: " << std::endl;
     for (unsigned int i = 0; i < prog->variables.size(); ++i) {
         std::cout << "  " << i << ") ";
-        debug_print(prog->variables[i]);
+        debug_print(prog, prog->variables[i], "  ");
     }
     std::cout << "Types: " << std::endl;
     for (unsigned int i = 0; i < prog->types.size(); ++i) {
         std::cout << "  " << i << ") ";
-        debug_print(prog->types[i]);
+        debug_print(prog, prog->types[i], "  ");
     }
     std::cout << "Functions: " << std::endl;
     for (unsigned int i = 0; i < prog->functions.size(); ++i) {
         std::cout << "  " << i << ") ";
-        debug_print(prog->functions[i]);
+        debug_print(prog, prog->functions[i], "  ");
     }
 }
 
@@ -107,19 +121,19 @@ void add_variable(ProgPtr prog, ExPtr ex) {
     prog->variable_lookup[ex->args[0]->command] = prog->variables.size() - 1;
 }
 
-void add_function(ProgPtr prog, ExPtr ex, int return_type, ExPtr arg, Function_Type::Type ftype) {
-    require_minimum_size(ex, 1);
-    if (prog->function_lookup.find(ex->args[0]->command) != prog->function_lookup.end()) {
-        std::cerr << "Conflicting type definitions for: " << ex->args[0]->command << std::endl;
+void add_function(ProgPtr prog, std::string &name, int return_type, ExPtr arg, ExPtr root, Function_Type::Type ftype) {
+    //require_minimum_size(ex, 1);
+    if (prog->function_lookup.find(name) != prog->function_lookup.end()) {
+        std::cerr << "Conflicting function definitions for: " << name << std::endl;
         exit(1);
     }
     else {
         FuncPtr new_func(new Function());
-        new_func->readable_name = ex->args[0]->command;
+        new_func->readable_name = name;
         new_func->type = ftype;
-        new_func->root = ex;
+        new_func->root = root;
         if (arg->command != "list") {
-            std::cerr << "Missing parameter list in arguments for " << ex->args[0]->command << std::endl;
+            std::cerr << "Missing parameter list in arguments for " << name << std::endl;
             exit(1);
         }
 
@@ -133,7 +147,7 @@ void add_function(ProgPtr prog, ExPtr ex, int return_type, ExPtr arg, Function_T
         new_func->return_type = return_type;
 
         prog->functions.push_back(new_func);
-        prog->function_lookup[ex->args[0]->command] = prog->functions.size() - 1;
+        prog->function_lookup[name] = prog->functions.size() - 1;
     }
 }
 
@@ -165,8 +179,8 @@ void analyze_func_decl_pass(ProgPtr prog, ExPtr ex) {
     for (unsigned int i = 0; i < ex->args.size(); ++i) {
         ExPtr arg = ex->args[i];
         if (arg->command == "defaction") {
-            require_minimum_size(arg, 3);
-            add_function(prog, arg, find_type(prog, "void"), arg->args[2], Function_Type::Action);
+            require_minimum_size(arg, 4);
+            add_function(prog, arg->args[1]->command, find_type(prog, "void"), arg->args[2], arg->args[3], Function_Type::Action);
             int t = find_type(prog, arg->args[0]->command);
             if (t == -1) {
                 std::cerr << "Can not find parent type for action: " << arg->args[1]->command << std::endl;
@@ -181,8 +195,8 @@ void analyze_func_decl_pass(ProgPtr prog, ExPtr ex) {
         }
         else if (arg->command == "deffun") {
             if (find_type(prog, arg->args[1]->command) != -1) {
-                require_minimum_size(arg, 3);
-                add_function(prog, arg, prog->type_lookup[arg->args[1]->command], arg->args[2], Function_Type::Action);
+                require_minimum_size(arg, 4);
+                add_function(prog, arg->args[0]->command, prog->type_lookup[arg->args[1]->command], arg->args[2], arg->args[3], Function_Type::Action);
             }
             else {
                 std::cerr << "Can not find type in function call: " << arg->args[1]->command << std::endl;
@@ -190,8 +204,8 @@ void analyze_func_decl_pass(ProgPtr prog, ExPtr ex) {
             }
         }
         else if (arg->command == "defmethod") {
-            require_minimum_size(arg, 3);
-            add_function(prog, arg, find_type(prog, "void"), arg->args[2], Function_Type::Action);
+            require_minimum_size(arg, 5);
+            add_function(prog, arg->args[1]->command, find_type(prog, arg->args[2]->command), arg->args[3], arg->args[4], Function_Type::Action);
             int t = find_type(prog, arg->args[0]->command);
             if (t == -1) {
                 std::cerr << "Can not find parent type for method: " << arg->args[1]->command << std::endl;
