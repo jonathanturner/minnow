@@ -16,7 +16,6 @@ void debug_print(ProgPtr prog, TypePtr type, std::string prepend) {
     std::cout << prepend << type->readable_name << " " << type->type << std::endl;
 
     for (std::map<std::string, int>::iterator iter = type->attributes.begin(), end = type->attributes.end(); iter != end; ++iter) {
-        std::cout << prepend;
         debug_print(prog, prog->variables[iter->second], prepend + "  ");
     }
 
@@ -167,9 +166,16 @@ void analyze_type_def_pass(ProgPtr prog, ExPtr ex) {
     for (unsigned int i = 0; i < ex->args.size(); ++i) {
         ExPtr arg = ex->args[i];
         if ((arg->command == "defactor") || (arg->command == "defstruct")) {
-            for (unsigned int i = 1; i < arg->args.size(); ++i) {
-                add_variable(prog, arg->args[i]);
-                //todo: need to add attributes here
+            if (find_type(prog, arg->args[0]->command) != -1) {
+                TypePtr type = prog->types[find_type(prog, arg->args[0]->command)];
+                for (unsigned int j = 1; j < arg->args.size(); ++j) {
+                    add_variable(prog, arg->args[j]);
+                    type->attributes[arg->args[j]->args[0]->command] = prog->variables.size() - 1;
+                }
+            }
+            else {
+                std::cerr << "Internal error, type parsed incorrectly: " << arg->args[0]->command << std::endl;
+                exit(1);
             }
         }
     }
