@@ -1,0 +1,10 @@
+(defactor bob
+ (var x sam)
+ (var y sam))
+(defstruct sam)
+(defaction bob doaction [(var z sam)]
+ (print "hello"))
+(defmethod bob domethod sam [(var a sam)]
+ (print "hello"))
+(deffun dofun bob [(var b sam)]
+ (print "hello"))

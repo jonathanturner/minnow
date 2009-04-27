@@ -97,8 +97,8 @@ void add_type(ProgPtr prog, ExPtr ex, Class_Type::Type type) {
 
 void add_variable(ProgPtr prog, ExPtr ex) {
     require_minimum_size(ex, 2);
-    if (ex->command != "def") {
-        std::cerr << "Variable declarations should start with 'def'" << std::endl;
+    if (ex->command != "var") {
+        std::cerr << "Variable declarations should start with 'var'" << std::endl;
         exit(1);
     }
     int type_id = find_type(prog, ex->args[1]->command);
@@ -120,7 +120,7 @@ void add_variable(ProgPtr prog, ExPtr ex) {
     prog->variable_lookup[ex->args[0]->command] = prog->variables.size() - 1;
 }
 
-void add_function(ProgPtr prog, std::string &name, int return_type, ExPtr arg, ExPtr root, Function_Type::Type ftype) {
+void add_function(ProgPtr prog, std::string &name, int return_type, ExPtr arg, ExPtr root, Function_Type::Type ftype, bool is_extern) {
     //require_minimum_size(ex, 1);
     if (prog->function_lookup.find(name) != prog->function_lookup.end()) {
         std::cerr << "Conflicting function definitions for: " << name << std::endl;
@@ -131,6 +131,7 @@ void add_function(ProgPtr prog, std::string &name, int return_type, ExPtr arg, E
         new_func->readable_name = name;
         new_func->type = ftype;
         new_func->root = root;
+        new_func->is_extern = is_extern;
         if (arg->command != "list") {
             std::cerr << "Missing parameter list in arguments for " << name << std::endl;
             exit(1);
@@ -186,7 +187,7 @@ void analyze_func_decl_pass(ProgPtr prog, ExPtr ex) {
         ExPtr arg = ex->args[i];
         if (arg->command == "defaction") {
             require_minimum_size(arg, 4);
-            add_function(prog, arg->args[1]->command, find_type(prog, "void"), arg->args[2], arg->args[3], Function_Type::Action);
+            add_function(prog, arg->args[1]->command, find_type(prog, "void"), arg->args[2], arg->args[3], Function_Type::Action, false);
             int t = find_type(prog, arg->args[0]->command);
             if (t == -1) {
                 std::cerr << "Can not find parent type for action: " << arg->args[1]->command << std::endl;
@@ -202,7 +203,17 @@ void analyze_func_decl_pass(ProgPtr prog, ExPtr ex) {
         else if (arg->command == "deffun") {
             if (find_type(prog, arg->args[1]->command) != -1) {
                 require_minimum_size(arg, 4);
-                add_function(prog, arg->args[0]->command, prog->type_lookup[arg->args[1]->command], arg->args[2], arg->args[3], Function_Type::Action);
+                add_function(prog, arg->args[0]->command, prog->type_lookup[arg->args[1]->command], arg->args[2], arg->args[3], Function_Type::Action, false);
+            }
+            else {
+                std::cerr << "Can not find type in function call: " << arg->args[1]->command << std::endl;
+                exit(1);
+            }
+        }
+        else if (arg->command == "defextern") {
+            if (find_type(prog, arg->args[1]->command) != -1) {
+                require_minimum_size(arg, 4);
+                add_function(prog, arg->args[0]->command, prog->type_lookup[arg->args[1]->command], arg->args[2], arg->args[3], Function_Type::Action, true);
             }
             else {
                 std::cerr << "Can not find type in function call: " << arg->args[1]->command << std::endl;
@@ -211,7 +222,7 @@ void analyze_func_decl_pass(ProgPtr prog, ExPtr ex) {
         }
         else if (arg->command == "defmethod") {
             require_minimum_size(arg, 5);
-            add_function(prog, arg->args[1]->command, find_type(prog, arg->args[2]->command), arg->args[3], arg->args[4], Function_Type::Action);
+            add_function(prog, arg->args[1]->command, find_type(prog, arg->args[2]->command), arg->args[3], arg->args[4], Function_Type::Action, false);
             int t = find_type(prog, arg->args[0]->command);
             if (t == -1) {
                 std::cerr << "Can not find parent type for method: " << arg->args[1]->command << std::endl;

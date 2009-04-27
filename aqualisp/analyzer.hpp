@@ -42,6 +42,7 @@ struct Function {
     std::vector<int> parameter_types;
     int return_type;
     ExPtr root;
+    bool is_extern;
 };
 
 struct Program {
