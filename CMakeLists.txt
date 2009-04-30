@@ -10,7 +10,7 @@ SET (AQUARIUM_SRCS aquarium/actor.c aquarium/message.c aquarium/message_queue.c
 
 SET (AQUARIUM_LIBS )
 
-SET (AQUALISP_SRCS aqualisp/parser.cpp aqualisp/utils.cpp aqualisp/analyzer.cpp)
+SET (AQUALISP_SRCS aqualisp/parser.cpp aqualisp/utils.cpp aqualisp/analyzer.cpp aqualisp/expression.cpp)
 
 #Platform ident hackery
 IF (WIN32)

@@ -2,34 +2,34 @@
  (var Passer__id int32)
  (var Passer__next Passer))
 
-(defaction Passer pass [(var token int32)]
+(defaction Passer pass (list (var token int32))
  (if (== token 0)
   (block
    (printi Passer__id)
    (exit))
   (block
-   (msg Passer__next pass [(- token 1)]))))
+   (msg Passer__next pass (list (- token 1))))))
 
-(defaction Passer set_id_and_next [(var id int32) (var next Passer)]
+(defaction Passer set_id_and_next (list (var id int32) (var next Passer))
  (= Passer__id id)
  (= Passer__next next))
 
-(defaction __Program__ main [(var args Array__string)]
+(defaction __Program__ main (list (var args Array__string))
  (var head Passer)
  (var curr Passer)
  (var tmp_i int32)
  (var next Passer)
  
- (= head (spawn Passer []))
+ (= head (spawn Passer (list )))
  (= curr head)
  (= tmp_i 1)
  (while (<= tmp_i 502)
   (cont head curr tmp_i)
   (block
-   (= next (spawn Passer []))
-   (msg curr set_id_and_next [tmp_i next])
+   (= next (spawn Passer (list )))
+   (msg curr set_id_and_next (list tmp_i next))
    (= curr next)
    (= tmp_i (- tmp_i 1))))
- (msg curr set_id_and_next [503 head])
- (msg head pass (. (index args 0) to_int [])))
+ (msg curr set_id_and_next (list 503 head))
+ (msg head pass (. (index args 0) to_int (list ))))
 

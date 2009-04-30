@@ -8,10 +8,20 @@
 
 void debug_print(const ExPtr root, std::string prepend) {
     if (root->args.size() > 0) {
-        std::cout << prepend << '{' << root->command << '}' << std::endl;
+        if (root->meta_id == -1) {
+            std::cout << prepend << '{' << root->command << '}' << std::endl;
+        }
+        else {
+            std::cout << prepend << '{' << root->command << " " << root->meta_id << '}' << std::endl;
+        }
     }
     else {
-        std::cout << prepend << root->command << std::endl;
+        if (root->meta_id == -1) {
+            std::cout << prepend << root->command << std::endl;
+        }
+        else {
+            std::cout << prepend << root->command << " " << root->meta_id << std::endl;
+        }
     }
     for (unsigned int i = 0; i < root->args.size(); ++i) {
         debug_print(root->args[i], prepend+" ");
@@ -28,9 +38,6 @@ std::vector<std::string> lex(std::string &s) {
     std::vector<std::string> ret_val;
     std::string::iterator iter = s.begin(), end = s.end(), leading;
 
-    //ret_val.push_back("(");
-    //ret_val.push_back("prog");
-
     while (iter != end) {
         if (*iter == '(') {
             ret_val.push_back("(");
@@ -40,12 +47,12 @@ std::vector<std::string> lex(std::string &s) {
             ret_val.push_back(")");
             ++iter;
         }
-        else if (*iter == '[') {
-            ret_val.push_back("[");
+        else if (*iter == '{') {
+            ret_val.push_back("{");
             ++iter;
         }
-        else if (*iter == ']') {
-            ret_val.push_back("]");
+        else if (*iter == '}') {
+            ret_val.push_back("}");
             ++iter;
         }
         else if (isspace(*iter)) {
@@ -62,7 +69,7 @@ std::vector<std::string> lex(std::string &s) {
         }
         else {
             leading = iter;
-            while ((iter != end) && (*iter != ')') && (*iter != '(') && (*iter != ']') && (*iter != '[')&& (!isspace(*iter))) {
+            while ((iter != end) && (*iter != ')') && (*iter != '(') && (*iter != '}') && (*iter != '{')&& (!isspace(*iter))) {
                 ++iter;
             }
 
@@ -70,36 +77,35 @@ std::vector<std::string> lex(std::string &s) {
         }
     }
 
-    //ret_val.push_back(")");
-
     return ret_val;
 }
 
 ExPtr parse(std::vector<std::string>::iterator &iter, std::vector<std::string>::iterator &end) {
-   ExPtr p(new Expression);
+   ExPtr p = create_expression();
 
    if (iter == end) {
-       return ExPtr();
+       return p;
    }
 
    if (*iter == "(") {
        ++iter;
+       if (*iter == "{") {
+           //metadata notification
+           ++iter;
+           std::string meta_ident = *iter;
+           int meta_id = atoi(meta_ident.c_str());
+           p->meta_id = meta_id;
+           ++iter; //eat "}"
+           ++iter;
+       }
+
+       if ((*iter == ")") || (*iter == "(")) {
+           std::cerr << "Expressions without 'command' tokens are not allowed" << std::endl;
+           exit(1);
+       }
        p->command = *iter;
        ++iter;
        while ((iter != end) && (*iter != ")"))  {
-           ExPtr exp = parse(iter, end);
-           if (exp.get() != NULL) {
-               p->args.push_back(exp);
-           }
-       }
-       if (iter != end) ++iter;
-       return p;
-   }
-
-   else if (*iter == "[") {
-       p->command = "list";
-       ++iter;
-       while ((iter != end) && (*iter != "]"))  {
            ExPtr exp = parse(iter, end);
            if (exp.get() != NULL) {
                p->args.push_back(exp);
