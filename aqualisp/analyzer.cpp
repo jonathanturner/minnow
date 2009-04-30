@@ -48,7 +48,7 @@ void debug_print(ProgPtr prog, MetaPtr meta, std::string prepend) {
 }
 
 void debug_print(ProgPtr prog, VarPtr var, std::string prepend) {
-    std::cout << prepend << var->readable_name << " : " << get_name_for_type(prog, var->type) << std::endl;
+    std::cout << prepend << var->readable_name << " : " << get_name_for_type(prog, var->type_id) << std::endl;
 }
 
 void debug_print(ProgPtr prog, TypePtr type, std::string prepend) {
@@ -181,7 +181,7 @@ void add_variable(ProgPtr prog, ExPtr ex) {
         exit(1);
     }
     VarPtr new_var(new Variable());
-    new_var->type = type_id;
+    new_var->type_id = type_id;
     new_var->readable_name = ex->args[0]->command;
     new_var->root = ex;
 
@@ -209,7 +209,7 @@ void add_function(ProgPtr prog, std::string &name, int return_type, ExPtr arg, E
         for (unsigned int i = 0; i < arg->args.size(); ++i) {
             add_variable(prog, arg->args[i]);
             VarPtr var = prog->variables[prog->variables.size() - 1];
-            new_func->parameter_types.push_back(var->type);
+            new_func->parameter_types.push_back(var->type_id);
             new_func->variables[arg->args[i]->args[0]->command] = prog->variables.size() - 1;
         }
         //new_type->parameter_types
@@ -312,8 +312,94 @@ void analyze_func_decl_pass(ProgPtr prog, ExPtr ex) {
     }
 }
 
-void analyze_func_def_pass(ProgPtr prog, ExPtr ex) {
+void analyze_expression(ProgPtr prog, ExPtr ex, FuncPtr func) {
+    if (ex->args.size() == 0) {
+        int var_id = find_var(prog, ex->command);
+        if (var_id == -1) {
+            std::cerr << "Variable not found: " << ex->command << std::endl;
+            exit(1);
+        }
+        else {
+            VarPtr var = prog->variables[var_id];
+            if (ex->meta_id == -1) {
+                MetaPtr meta(new Metadata());
+                prog->metas.push_back(meta);
+                ex->meta_id = prog->metas.size() - 1;
+            }
+            MetaPtr meta = prog->metas[ex->meta_id];
+            meta->type_id = var->type_id;
+            return;
+        }
+    }
 
+    if (ex->command == "block") {
+        for (unsigned int i = 0; i < ex->args.size(); ++i) {
+            analyze_expression(prog, ex->args[i], func);
+        }
+    }
+    else if (ex->command == "return") {
+        if (ex->args.size() > 0) {
+            analyze_expression(prog, ex->args[0], func);
+            int meta_id = ex->args[0]->meta_id;
+            if (meta_id == -1) {
+                std::cerr << "Return missing typed value" << std::endl;
+                exit(1);
+            }
+
+            MetaPtr meta = prog->metas[ex->args[0]->meta_id];
+            if (meta->type_id != func->return_type) {
+                std::cerr << "Return type does not match prototype: " << func->readable_name << std::endl;
+                exit(1);
+            }
+
+        }
+    }
+    else if (ex->command == "+") {
+        require_minimum_size(ex, 2);
+        for (unsigned int i = 0; i < ex->args.size(); ++i) {
+            analyze_expression(prog, ex->args[i], func);
+        }
+
+        if (ex->args[0]->meta_id == -1) {
+            std::cerr << "Can not analyze: " << ex->args[0]->command << std::endl;
+            exit(1);
+        }
+
+        MetaPtr meta = prog->metas[ex->args[0]->meta_id];
+        if (meta->type_id == -1) {
+            std::cerr << "Unknown type for: " << ex->args[0]->command << std::endl;
+            exit(1);
+        }
+
+        int required_type_id = meta->type_id;
+        for (unsigned int i = 1; i < ex->args.size(); ++i) {
+            int arg_meta_id = ex->args[i]->meta_id;
+            if (arg_meta_id == -1) {
+                std::cerr << "Unknown metadata for: " << ex->args[i]->command << std::endl;
+                exit(1);
+            }
+            MetaPtr arg_meta = prog->metas[ex->args[i]->meta_id];
+            if (arg_meta->type_id != required_type_id) {
+                std::cerr << "Mismatched types for: " << ex->args[i]->command << std::endl;
+                exit(1);
+            }
+        }
+
+        if (ex->meta_id == -1) {
+            MetaPtr meta(new Metadata());
+            prog->metas.push_back(meta);
+            ex->meta_id = prog->metas.size() - 1;
+        }
+        meta = prog->metas[ex->meta_id];
+        meta->type_id = required_type_id;
+
+    }
+}
+
+void analyze_func_def_pass(ProgPtr prog) {
+    for (unsigned int i = 0; i < prog->functions.size(); ++i) {
+        analyze_expression(prog, prog->functions[i]->root, prog->functions[i]);
+    }
 }
 
 void all_passes(ProgPtr prog, ExPtr ex) {
@@ -321,7 +407,7 @@ void all_passes(ProgPtr prog, ExPtr ex) {
     analyze_type_decl_pass(prog, ex);
     analyze_type_def_pass(prog, ex);
     analyze_func_decl_pass(prog, ex);
-    analyze_func_def_pass(prog, ex);
+    analyze_func_def_pass(prog);
 }
 
 

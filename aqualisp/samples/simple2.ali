@@ -1,0 +1,2 @@
+(deffun add int32 (list (var x int32) (var y int32))
+ (block (return (+ x y))))

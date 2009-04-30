@@ -11,6 +11,7 @@
 
 int main(int argc, char *argv[]) {
     std::string d;
+    ProgPtr prog(new Program());
 
     std::string prelude = "(deftype int32)(deftype uint32)(deftype float)(deftype double)(deftype Array__string)(defactor __Program__)";
 
@@ -32,12 +33,8 @@ int main(int argc, char *argv[]) {
     end = data.end();
 
     ex = parse(iter, end);
-
-    debug_print(ex, "");
-
-    ProgPtr prog(new Program());
-
     all_passes(prog, ex);
 
+    debug_print(ex, "");
     debug_print(prog);
 }

@@ -15,7 +15,7 @@
 
 struct Variable {
     std::string readable_name;
-    int type;
+    int type_id;
     ExPtr root;
 };
 
@@ -61,7 +61,7 @@ void analyze_meta_pass(ProgPtr prog, ExPtr ex);
 void analyze_type_decl_pass(ProgPtr prog, ExPtr ex);
 void analyze_type_def_pass(ProgPtr prog, ExPtr ex);
 void analyze_func_decl_pass(ProgPtr prog, ExPtr ex);
-void analyze_func_def_pass(ProgPtr prog, ExPtr ex);
+void analyze_func_def_pass(ProgPtr prog);
 
 void all_passes(ProgPtr prog, ExPtr ex);
 
