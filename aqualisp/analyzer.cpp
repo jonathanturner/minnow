@@ -7,18 +7,58 @@
 #include "parser.hpp"
 #include "analyzer.hpp"
 
+int find_meta(ProgPtr prog, int meta_id) {
+    if (prog->meta_lookup.find(meta_id) != prog->meta_lookup.end()) {
+        return prog->meta_lookup[meta_id];
+    }
+    else {
+        return -1;
+    }
+}
+
+int find_type(ProgPtr prog, const std::string &type_name) {
+    if (prog->type_lookup.find(type_name) != prog->type_lookup.end()) {
+        return prog->type_lookup[type_name];
+    }
+    else {
+        return -1;
+    }
+}
+int find_var(ProgPtr prog, const std::string &var_name) {
+    if (prog->variable_lookup.find(var_name) != prog->variable_lookup.end()) {
+        return prog->variable_lookup[var_name];
+    }
+    else {
+        return -1;
+    }
+}
+
+std::string get_name_for_type(ProgPtr prog, int type_id) {
+    if ((type_id >= 0) && (type_id < (int)prog->types.size())) {
+        return prog->types[type_id]->readable_name;
+    }
+    else {
+        return "typeless";
+    }
+}
 void debug_print(ProgPtr prog, MetaPtr meta, std::string prepend) {
-    std::cout << prepend << "fn: " << meta->filename << " start: " << meta->start_pos.line << ", " << meta->start_pos.column;
-    std::cout << " end: " << meta->end_pos.line << ", " << meta->end_pos.column << " def: " << meta->definition_id;
-    std::cout << " type: " << meta->type_id << " orig: " << meta->orig_name << std::endl;
+    std::cout << prepend << "fn: " << meta->filename << " start: (" << meta->start_pos.line << ", " << meta->start_pos.column;
+    std::cout << ") end: (" << meta->end_pos.line << ", " << meta->end_pos.column << ") def: " << meta->definition_id;
+    std::cout << " type: " << get_name_for_type(prog, meta->type_id) << " orig: " << meta->orig_name << std::endl;
 }
 
 void debug_print(ProgPtr prog, VarPtr var, std::string prepend) {
-    std::cout << prepend << var->readable_name << " : " << var->type << std::endl;
+    std::cout << prepend << var->readable_name << " : " << get_name_for_type(prog, var->type) << std::endl;
 }
 
 void debug_print(ProgPtr prog, TypePtr type, std::string prepend) {
-    std::cout << prepend << type->readable_name << " " << type->type << std::endl;
+    std::cout << prepend << type->readable_name << " ";
+    if (type->type == Class_Type::Actor) {
+        std::cout << "(Actor)" << std::endl;
+    }
+    else {
+        std::cout << "(Basic)" << std::endl;
+    }
 
     for (std::map<std::string, int>::iterator iter = type->attributes.begin(), end = type->attributes.end(); iter != end; ++iter) {
         debug_print(prog, prog->variables[iter->second], prepend + "  ");
@@ -32,9 +72,9 @@ void debug_print(ProgPtr prog, TypePtr type, std::string prepend) {
 void debug_print(ProgPtr prog, FuncPtr func, std::string prepend) {
     std::cout << prepend << func->readable_name << " [";
     for (unsigned int i = 0; i < func->parameter_types.size(); ++i) {
-        std::cout << func->parameter_types[i] << " ";
+        std::cout << get_name_for_type(prog, func->parameter_types[i]) << " ";
     }
-    std::cout << "] : " << func->return_type << std::endl;
+    std::cout << "] : " << get_name_for_type(prog, func->return_type) << std::endl;
 
     for (std::map<std::string, int>::iterator iter = func->variables.begin(), end = func->variables.end(); iter != end; ++iter) {
         debug_print(prog, prog->variables[iter->second], prepend + "  ");
@@ -70,31 +110,6 @@ void require_minimum_size(ExPtr ex, unsigned int min) {
         std::cerr << "Number of arguments doesn't not meet minimum requirement for: " << std::endl;
         debug_print(ex, "");
         exit(1);
-    }
-}
-int find_meta(ProgPtr prog, int meta_id) {
-    if (prog->meta_lookup.find(meta_id) != prog->meta_lookup.end()) {
-        return prog->meta_lookup[meta_id];
-    }
-    else {
-        return -1;
-    }
-}
-
-int find_type(ProgPtr prog, const std::string &type_name) {
-    if (prog->type_lookup.find(type_name) != prog->type_lookup.end()) {
-        return prog->type_lookup[type_name];
-    }
-    else {
-        return -1;
-    }
-}
-int find_var(ProgPtr prog, const std::string &var_name) {
-    if (prog->variable_lookup.find(var_name) != prog->variable_lookup.end()) {
-        return prog->variable_lookup[var_name];
-    }
-    else {
-        return -1;
     }
 }
 
