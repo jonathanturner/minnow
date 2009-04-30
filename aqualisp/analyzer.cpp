@@ -281,7 +281,7 @@ void analyze_func_decl_pass(ProgPtr prog, ExPtr ex) {
         else if (arg->command == "deffun") {
             if (find_type(prog, arg->args[1]->command) != -1) {
                 require_minimum_size(arg, 4);
-                add_function(prog, arg->args[0]->command, prog->type_lookup[arg->args[1]->command], arg->args[2], arg->args[3], Function_Type::Action, false);
+                add_function(prog, arg->args[0]->command, prog->type_lookup[arg->args[1]->command], arg->args[2], arg->args[3], Function_Type::Function, false);
             }
             else {
                 std::cerr << "Can not find type in function call: " << arg->args[1]->command << std::endl;
@@ -291,7 +291,7 @@ void analyze_func_decl_pass(ProgPtr prog, ExPtr ex) {
         else if (arg->command == "defextern") {
             if (find_type(prog, arg->args[1]->command) != -1) {
                 require_minimum_size(arg, 4);
-                add_function(prog, arg->args[0]->command, prog->type_lookup[arg->args[1]->command], arg->args[2], arg->args[3], Function_Type::Action, true);
+                add_function(prog, arg->args[0]->command, prog->type_lookup[arg->args[1]->command], arg->args[2], arg->args[3], Function_Type::Function, true);
             }
             else {
                 std::cerr << "Can not find type in function call: " << arg->args[1]->command << std::endl;
@@ -300,7 +300,7 @@ void analyze_func_decl_pass(ProgPtr prog, ExPtr ex) {
         }
         else if (arg->command == "defmethod") {
             require_minimum_size(arg, 5);
-            add_function(prog, arg->args[1]->command, find_type(prog, arg->args[2]->command), arg->args[3], arg->args[4], Function_Type::Action, false);
+            add_function(prog, arg->args[1]->command, find_type(prog, arg->args[2]->command), arg->args[3], arg->args[4], Function_Type::Method, false);
             int t = find_type(prog, arg->args[0]->command);
             if (t == -1) {
                 std::cerr << "Can not find parent type for method: " << arg->args[1]->command << std::endl;
