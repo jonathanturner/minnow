@@ -49,17 +49,21 @@ struct Program {
     std::vector<VarPtr> variables;
     std::vector<TypePtr> types;
     std::vector<FuncPtr> functions;
+    std::vector<MetaPtr> metas;
 
     std::map<std::string, int > variable_lookup;
     std::map<std::string, int > type_lookup;
     std::map<std::string, int > function_lookup;
-
+    std::map<int, int> meta_lookup;
 };
 
+void analyze_meta_pass(ProgPtr prog, ExPtr ex);
 void analyze_type_decl_pass(ProgPtr prog, ExPtr ex);
 void analyze_type_def_pass(ProgPtr prog, ExPtr ex);
 void analyze_func_decl_pass(ProgPtr prog, ExPtr ex);
 void analyze_func_def_pass(ProgPtr prog, ExPtr ex);
+
+void all_passes(ProgPtr prog, ExPtr ex);
 
 void debug_print(ProgPtr prog, VarPtr var, std::string prepend);
 void debug_print(ProgPtr prog, TypePtr type, std::string prepend);

@@ -36,10 +36,8 @@ int main(int argc, char *argv[]) {
     debug_print(ex, "");
 
     ProgPtr prog(new Program());
-    analyze_type_decl_pass(prog, ex);
-    analyze_type_def_pass(prog, ex);
-    analyze_func_decl_pass(prog, ex);
-    analyze_func_def_pass(prog, ex);
+
+    all_passes(prog, ex);
 
     debug_print(prog);
 }

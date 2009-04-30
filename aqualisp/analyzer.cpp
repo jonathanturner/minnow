@@ -7,6 +7,11 @@
 #include "parser.hpp"
 #include "analyzer.hpp"
 
+void debug_print(ProgPtr prog, MetaPtr meta, std::string prepend) {
+    std::cout << prepend << "fn: " << meta->filename << " start: " << meta->start_pos.line << ", " << meta->start_pos.column;
+    std::cout << " end: " << meta->end_pos.line << ", " << meta->end_pos.column << " def: " << meta->definition_id;
+    std::cout << " type: " << meta->type_id << " orig: " << meta->orig_name << std::endl;
+}
 
 void debug_print(ProgPtr prog, VarPtr var, std::string prepend) {
     std::cout << prepend << var->readable_name << " : " << var->type << std::endl;
@@ -38,6 +43,11 @@ void debug_print(ProgPtr prog, FuncPtr func, std::string prepend) {
 }
 
 void debug_print(ProgPtr prog) {
+    std::cout << "Metadata: " << std::endl;
+    for (unsigned int i = 0; i < prog->metas.size(); ++i) {
+        std::cout << "  " << i << ") ";
+        debug_print(prog, prog->metas[i], "  ");
+    }
     std::cout << "Variables: " << std::endl;
     for (unsigned int i = 0; i < prog->variables.size(); ++i) {
         std::cout << "  " << i << ") ";
@@ -62,6 +72,15 @@ void require_minimum_size(ExPtr ex, unsigned int min) {
         exit(1);
     }
 }
+int find_meta(ProgPtr prog, int meta_id) {
+    if (prog->meta_lookup.find(meta_id) != prog->meta_lookup.end()) {
+        return prog->meta_lookup[meta_id];
+    }
+    else {
+        return -1;
+    }
+}
+
 int find_type(ProgPtr prog, const std::string &type_name) {
     if (prog->type_lookup.find(type_name) != prog->type_lookup.end()) {
         return prog->type_lookup[type_name];
@@ -78,6 +97,41 @@ int find_var(ProgPtr prog, const std::string &var_name) {
         return -1;
     }
 }
+
+void add_meta(ProgPtr prog, ExPtr ex) {
+    require_minimum_size(ex, 9);
+
+    int meta_id = atoi(ex->args[0]->command.c_str());
+
+    if (find_meta(prog, meta_id) != -1 ) {
+        std::cerr << "Conflicting definitions for meta: " << ex->args[0]->command << std::endl;
+        exit(1);
+    }
+    else {
+        std::string filename = ex->args[1]->command;
+        int start_line = atoi(ex->args[2]->command.c_str());
+        int start_col = atoi(ex->args[3]->command.c_str());
+        int end_line = atoi(ex->args[4]->command.c_str());
+        int end_col = atoi(ex->args[5]->command.c_str());
+        int definition_id = atoi(ex->args[6]->command.c_str());
+        int type_id = atoi(ex->args[7]->command.c_str());
+        std::string orig_name = ex->args[8]->command;
+
+        MetaPtr new_meta(new Metadata());
+        new_meta->filename = filename;
+        new_meta->start_pos.line = start_line;
+        new_meta->start_pos.column = start_col;
+        new_meta->end_pos.line = end_line;
+        new_meta->end_pos.column = end_col;
+        new_meta->definition_id = definition_id;
+        new_meta->type_id = type_id;
+        new_meta->orig_name = orig_name;
+
+        prog->metas.push_back(new_meta);
+        prog->meta_lookup[meta_id] = prog->metas.size() - 1;
+    }
+}
+
 void add_type(ProgPtr prog, ExPtr ex, Class_Type::Type type) {
     require_minimum_size(ex, 1);
     if (find_type(prog, ex->args[0]->command) != -1) {
@@ -148,6 +202,15 @@ void add_function(ProgPtr prog, std::string &name, int return_type, ExPtr arg, E
 
         prog->functions.push_back(new_func);
         prog->function_lookup[name] = prog->functions.size() - 1;
+    }
+}
+
+void analyze_meta_pass(ProgPtr prog, ExPtr ex) {
+    for (unsigned int i = 0; i < ex->args.size(); ++i) {
+        ExPtr arg = ex->args[i];
+        if (arg->command == "meta") {
+            add_meta(prog, arg);
+        }
     }
 }
 
@@ -238,5 +301,12 @@ void analyze_func_def_pass(ProgPtr prog, ExPtr ex) {
 
 }
 
+void all_passes(ProgPtr prog, ExPtr ex) {
+    analyze_meta_pass(prog, ex);
+    analyze_type_decl_pass(prog, ex);
+    analyze_type_def_pass(prog, ex);
+    analyze_func_decl_pass(prog, ex);
+    analyze_func_def_pass(prog, ex);
+}
 
 
